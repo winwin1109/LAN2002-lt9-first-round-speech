@@ -2,8 +2,10 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>我想，我說，我做主！ - 1分鐘發言練習互動網頁</title>
+    <!-- 引入 html2pdf.js 讓手機與電腦皆可直接一鍵下載標準 PDF 檔案 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -13,8 +15,9 @@
             --accent: #f59e0b;
             --purple: #7c3aed;
             --purple-dark: #6d28d9;
+            --rose: #e11d48;
             --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fef3c7 100%);
-            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-bg: rgba(255, 255, 255, 0.97);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
@@ -25,6 +28,7 @@
             margin: 0;
             padding: 0;
             font-family: "Microsoft JhengHei", "PingFang HK", "Noto Sans TC", sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -34,32 +38,37 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            padding-bottom: 70px;
+            padding: 16px;
+            padding-bottom: 95px;
         }
 
-        /* 頂部計時器與工具列 */
+        /* 頂部計時器與工具列（支援手機滑動置頂） */
         .top-utility-bar {
             width: 100%;
             max-width: 1120px;
-            background: white;
-            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            padding: 10px 20px;
             border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
+            position: sticky;
+            top: 8px;
+            z-index: 900;
+            border: 1px solid #e2e8f0;
         }
 
         .brand-badge {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: var(--primary-dark);
             cursor: pointer;
         }
@@ -67,26 +76,37 @@
         .top-bar-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .timer-box {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: #f8fafc;
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 999px;
             border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .timer-box.time-up {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+
+        .timer-label-text {
+            font-size: 0.95rem;
+            font-weight: 700;
         }
 
         .timer-display {
-            font-size: 1.35rem;
+            font-size: 1.3rem;
             font-weight: 800;
             font-variant-numeric: tabular-nums;
             color: #0f172a;
-            min-width: 65px;
+            min-width: 58px;
             text-align: center;
         }
 
@@ -103,7 +123,7 @@
         /* 通用按鈕樣式 */
         .btn {
             border: none;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 12px;
             font-size: 1rem;
             font-weight: 700;
@@ -112,9 +132,10 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             text-decoration: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            touch-action: manipulation;
         }
 
         .btn:hover:not(:disabled) {
@@ -138,10 +159,22 @@
         .btn-secondary:hover:not(:disabled) { background: var(--secondary-dark); }
         .btn-purple { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; }
         .btn-purple:hover:not(:disabled) { background: linear-gradient(135deg, #6d28d9, #4338ca); }
+        .btn-rose { background: linear-gradient(135deg, #e11d48, #be123c); color: white; }
+        .btn-rose:hover:not(:disabled) { background: linear-gradient(135deg, #be123c, #9f1239); }
         .btn-accent { background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; }
         .btn-outline { background: white; color: var(--text-main); border: 2px solid #cbd5e1; }
         .btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
         .btn-sm { padding: 6px 12px; font-size: 0.9rem; border-radius: 8px; }
+
+        /* 語音朗讀動態效果 */
+        .speaking-active {
+            animation: speakingGlow 1.2s infinite;
+        }
+
+        @keyframes speakingGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); }
+        }
 
         /* 頁面容器 */
         .view-section {
@@ -151,9 +184,9 @@
             background: var(--card-bg);
             border-radius: 24px;
             box-shadow: var(--shadow);
-            padding: 32px;
+            padding: 28px;
             position: relative;
-            animation: fadeIn 0.35s ease;
+            animation: fadeIn 0.3s ease;
         }
 
         .view-section.active {
@@ -161,7 +194,7 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -170,16 +203,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
             border-bottom: 2px dashed #e2e8f0;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
         }
 
         .top-right-nav {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             margin-left: auto;
         }
@@ -187,40 +220,40 @@
         /* ================= 1. 首頁樣式 ================= */
         .hero-banner {
             text-align: center;
-            padding: 25px 20px 35px;
+            padding: 24px 18px 30px;
             background: linear-gradient(135deg, #eff6ff 0%, #fef3c7 100%);
             border-radius: 20px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
             border: 2px solid #bfdbfe;
         }
 
         .main-title {
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 900;
             background: linear-gradient(90deg, #1d4ed8, #047857, #d97706);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-            letter-spacing: 2px;
+            margin-bottom: 10px;
+            letter-spacing: 1.5px;
         }
 
         .sub-title {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: var(--text-muted);
-            margin-bottom: 24px;
+            margin-bottom: 22px;
             font-weight: 600;
         }
 
         .hero-action-group {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 16px;
             flex-wrap: wrap;
         }
 
         .btn-demo-hero {
-            font-size: 1.3rem;
-            padding: 15px 34px;
+            font-size: 1.2rem;
+            padding: 14px 28px;
             border-radius: 999px;
             background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
             color: white;
@@ -229,8 +262,8 @@
         }
 
         .btn-create-hero {
-            font-size: 1.3rem;
-            padding: 15px 34px;
+            font-size: 1.2rem;
+            padding: 14px 28px;
             border-radius: 999px;
             background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
             color: white;
@@ -240,8 +273,8 @@
 
         .topics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 28px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
         }
 
         .topic-entry-card {
@@ -257,7 +290,7 @@
         }
 
         .topic-entry-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-5px);
             border-color: var(--primary);
             box-shadow: 0 16px 32px rgba(37, 99, 235, 0.15);
         }
@@ -283,27 +316,29 @@
 
         .topic-tag {
             position: absolute;
-            top: 14px;
-            left: 14px;
+            top: 12px;
+            left: 12px;
             background: rgba(15, 23, 42, 0.85);
             color: white;
             padding: 6px 14px;
             border-radius: 999px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             backdrop-filter: blur(4px);
         }
 
         .topic-card-body {
-            padding: 20px 24px;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             background: white;
+            flex-wrap: wrap;
         }
 
         .topic-card-title {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: var(--text-main);
         }
@@ -312,11 +347,10 @@
         .demo-stage {
             background: linear-gradient(145deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%);
             border-radius: 24px;
-            padding: 32px 38px;
+            padding: 28px 32px;
             border: 3px solid #bfdbfe;
             box-shadow: inset 0 0 40px rgba(59, 130, 246, 0.06), 0 12px 30px rgba(0,0,0,0.05);
             position: relative;
-            min-height: 500px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -327,7 +361,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 12px;
             flex-wrap: wrap;
         }
@@ -335,29 +369,28 @@
         .demo-label-badge {
             background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             color: white;
-            padding: 10px 28px;
+            padding: 8px 24px;
             border-radius: 14px;
-            font-size: 1.65rem;
+            font-size: 1.5rem;
             font-weight: 900;
-            letter-spacing: 3px;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+            letter-spacing: 2px;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
             border: 2px solid #93c5fd;
         }
 
         .demo-step-header {
             text-align: center;
-            margin: 6px auto 20px;
+            margin: 6px auto 18px;
             background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-            padding: 12px 36px;
+            padding: 10px 30px;
             border-radius: 20px;
             border: 2px solid #7dd3fc;
             box-shadow: 0 6px 16px rgba(14, 165, 233, 0.15);
             display: inline-block;
-            align-self: center;
         }
 
         .demo-step-title {
-            font-size: 2rem;
+            font-size: 1.85rem;
             font-weight: 900;
             color: #dc2626;
             text-shadow: 1px 1px 0px #fff;
@@ -365,7 +398,7 @@
         }
 
         .demo-step-subtitle {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: #1e3a8a;
         }
@@ -377,24 +410,31 @@
             background: #fef3c7;
             border: 2px solid #fcd34d;
             color: #92400e;
-            padding: 10px 18px;
+            padding: 12px 16px;
             border-radius: 14px;
             margin-bottom: 16px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.98rem;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .demo-toolbar-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .demo-text-content {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 26px 32px;
+            padding: 22px 26px;
             border-left: 8px solid #2563eb;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
             margin-bottom: 18px;
-            font-size: 1.55rem;
-            line-height: 2.1;
+            font-size: 1.45rem;
+            line-height: 2.05;
             font-weight: 700;
         }
 
@@ -414,7 +454,7 @@
         /* 可點擊分析的句子片段樣式 */
         .clickable-seg {
             cursor: pointer;
-            padding: 3px 6px;
+            padding: 3px 5px;
             margin: 0 1px;
             border-radius: 8px;
             border-bottom: 3px dashed rgba(100, 116, 139, 0.45);
@@ -436,7 +476,7 @@
 
         .seg-inline-tag {
             display: none;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 900;
             padding: 2px 8px;
             border-radius: 999px;
@@ -463,14 +503,15 @@
             background: white;
             border: 3px solid #cbd5e1;
             border-radius: 18px;
-            padding: 18px 24px;
-            margin-bottom: 22px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             transition: all 0.25s ease;
             display: flex;
             align-items: center;
-            gap: 18px;
-            min-height: 92px;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .analysis-popup-box.active-analysis {
@@ -486,10 +527,10 @@
         }
 
         .analysis-badge-large {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 12px;
             color: white;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 900;
             white-space: nowrap;
             box-shadow: 0 4px 10px rgba(0,0,0,0.12);
@@ -497,25 +538,27 @@
 
         .analysis-detail-body {
             flex: 1;
+            min-width: 240px;
         }
 
         .analysis-quote {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #475569;
             font-weight: 700;
             margin-bottom: 4px;
         }
 
         .analysis-desc {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             color: #0f172a;
             font-weight: 800;
+            line-height: 1.5;
         }
 
         .demo-bottom-jumps {
             display: flex;
             justify-content: center;
-            gap: 32px;
+            gap: 20px;
             flex-wrap: wrap;
         }
 
@@ -523,24 +566,23 @@
             background: linear-gradient(135deg, #e0f2fe 0%, #cffafe 100%);
             border: 2px solid #38bdf8;
             border-radius: 16px;
-            padding: 12px 28px;
+            padding: 10px 24px;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s ease;
-            min-width: 210px;
+            min-width: 190px;
             box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
         }
 
         .jump-card-btn:hover {
             transform: translateY(-3px) scale(1.02);
             background: linear-gradient(135deg, #bae6fd 0%, #a5f3fc 100%);
-            box-shadow: 0 8px 18px rgba(14, 165, 233, 0.28);
         }
 
         .jump-card-btn .go-text {
             display: block;
             color: #dc2626;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 900;
             margin-bottom: 2px;
         }
@@ -548,7 +590,7 @@
         .jump-card-btn .target-text {
             display: block;
             color: #0f172a;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 800;
         }
 
@@ -557,12 +599,13 @@
             position: relative;
             width: 100%;
             max-width: 960px;
-            margin: 0 auto 24px;
+            margin: 0 auto 20px;
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.12);
             border: 3px solid #cbd5e1;
             background: #f8fafc;
+            line-height: 0;
         }
 
         .b1-interactive-container img.main-b1-img {
@@ -573,25 +616,26 @@
 
         .country-hotspot {
             position: absolute;
-            top: 30%;
-            height: 63%;
-            border-radius: 14px;
+            top: 28%;
+            height: 66%;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.25s ease;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             align-items: center;
-            padding-bottom: 16px;
+            padding-bottom: 12px;
             border: 3px solid transparent;
             text-decoration: none;
+            line-height: 1.2;
         }
 
-        .country-hotspot:hover {
-            background: rgba(37, 99, 235, 0.15);
+        .country-hotspot:hover,
+        .country-hotspot:active {
+            background: rgba(37, 99, 235, 0.16);
             border-color: #2563eb;
-            box-shadow: 0 0 25px rgba(37, 99, 235, 0.45);
-            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.45);
         }
 
         .hotspot-japan { left: 3.5%; width: 30%; }
@@ -601,16 +645,17 @@
         .watch-video-pill {
             background: rgba(220, 38, 38, 0.92);
             color: white;
-            padding: 8px 18px;
+            padding: 6px 14px;
             border-radius: 999px;
             font-weight: 800;
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
             border: 2px solid white;
             animation: bounceSlow 2s infinite;
+            white-space: nowrap;
         }
 
         @keyframes bounceSlow {
@@ -621,9 +666,9 @@
         .country-quick-buttons {
             display: flex;
             justify-content: center;
-            gap: 18px;
+            gap: 14px;
             flex-wrap: wrap;
-            margin-top: 15px;
+            margin-top: 14px;
         }
 
         .video-stage {
@@ -633,15 +678,15 @@
         }
 
         .video-country-title {
-            font-size: 2.4rem;
+            font-size: 2.1rem;
             font-weight: 900;
             color: var(--primary-dark);
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             display: inline-flex;
             align-items: center;
             gap: 12px;
             background: #eff6ff;
-            padding: 8px 32px;
+            padding: 8px 30px;
             border-radius: 999px;
             border: 2px solid #bfdbfe;
         }
@@ -652,7 +697,7 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             aspect-ratio: 16 / 9;
             display: flex;
             align-items: center;
@@ -676,7 +721,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 14px;
         }
@@ -686,10 +731,10 @@
             background: #ecfdf5;
             color: #047857;
             border: 2px solid #6ee7b7;
-            padding: 6px 22px;
+            padding: 6px 20px;
             border-radius: 999px;
             font-weight: 800;
-            font-size: 1.15rem;
+            font-size: 1.08rem;
         }
 
         .d-image-frame {
@@ -700,10 +745,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.12);
             border: 3px solid #cbd5e1;
             background: #ffffff;
-            min-height: 360px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            line-height: 0;
         }
 
         .d-image-frame img {
@@ -719,11 +761,12 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            line-height: 1.2;
         }
 
         .pet-hotspot {
             position: absolute;
-            border-radius: 16px;
+            border-radius: 14px;
             cursor: pointer;
             pointer-events: auto;
             transition: all 0.25s ease;
@@ -731,16 +774,16 @@
             flex-direction: column;
             justify-content: flex-end;
             align-items: center;
-            padding-bottom: 14px;
+            padding-bottom: 10px;
             border: 3px solid transparent;
             text-decoration: none;
         }
 
-        .pet-hotspot:hover {
+        .pet-hotspot:hover,
+        .pet-hotspot:active {
             background: rgba(5, 150, 105, 0.16);
             border-color: #059669;
-            box-shadow: 0 0 25px rgba(5, 150, 105, 0.45);
-            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(5, 150, 105, 0.45);
         }
 
         .hotspot-dog { left: 9.5%; top: 43%; width: 26%; height: 50%; }
@@ -750,36 +793,38 @@
         .pet-click-pill {
             background: rgba(5, 150, 105, 0.94);
             color: white;
-            padding: 8px 18px;
+            padding: 6px 14px;
             border-radius: 999px;
             font-weight: 800;
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
             border: 2px solid white;
             animation: bounceSlow 2s infinite;
+            white-space: nowrap;
         }
 
-        /* D2, D4, D6 圖片上的「深入了解」浮動按鍵（覆蓋原圖「相關鏈接 / 詳細介紹」位置） */
+        /* D2, D4, D6 圖片上的「深入了解」浮動按鍵 */
         .deep-dive-overlay-btn {
             position: absolute;
             left: 2.5%;
             top: 41%;
             background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 999px;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 900;
             cursor: pointer;
             border: 3px solid #ffffff;
             box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
             display: none;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             z-index: 15;
+            line-height: 1.2;
             animation: bounceSlow 1.8s infinite;
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -792,26 +837,26 @@
         .pet-quick-buttons {
             display: flex;
             justify-content: center;
-            gap: 14px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-top: 18px;
+            margin-top: 16px;
         }
 
         .d-dots-bar {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 16px;
+            gap: 8px;
+            margin-top: 14px;
             flex-wrap: wrap;
         }
 
         .d-dot-btn {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 10px;
             border: 2px solid #cbd5e1;
             background: white;
             font-weight: 800;
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
             color: var(--text-main);
@@ -831,14 +876,14 @@
         /* ================= 5. 三種動物「深入了解」趣味百科專頁 ================= */
         .pet-detail-hero {
             border-radius: 22px;
-            padding: 28px 32px;
+            padding: 24px 28px;
             color: white;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 18px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
@@ -847,23 +892,23 @@
         .pet-hero-lizard { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
 
         .pet-hero-title {
-            font-size: 2.3rem;
+            font-size: 2rem;
             font-weight: 900;
             margin-bottom: 6px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .pet-hero-subtitle {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             opacity: 0.95;
             font-weight: 600;
         }
 
         .pet-stats-badges {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -871,47 +916,41 @@
             background: rgba(255, 255, 255, 0.22);
             backdrop-filter: blur(6px);
             border: 2px solid rgba(255, 255, 255, 0.5);
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 14px;
             text-align: center;
         }
 
         .pet-stat-pill .label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             opacity: 0.9;
         }
 
         .pet-stat-pill .val {
             display: block;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 900;
         }
 
         .fun-facts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 18px;
+            margin-bottom: 22px;
         }
 
         .fun-fact-card {
             background: white;
             border-radius: 18px;
-            padding: 22px 24px;
+            padding: 20px 22px;
             border: 2px solid #e2e8f0;
             box-shadow: 0 6px 16px rgba(0,0,0,0.04);
-            transition: transform 0.2s;
-        }
-
-        .fun-fact-card:hover {
-            transform: translateY(-4px);
-            border-color: #93c5fd;
         }
 
         .fun-fact-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
+            font-size: 1.22rem;
+            margin-bottom: 8px;
             color: #0f172a;
             display: flex;
             align-items: center;
@@ -919,7 +958,7 @@
         }
 
         .fun-fact-card p {
-            font-size: 1.05rem;
+            font-size: 1.02rem;
             line-height: 1.7;
             color: #334155;
             font-weight: 600;
@@ -929,13 +968,13 @@
             background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
             border: 2px solid #f59e0b;
             border-radius: 18px;
-            padding: 22px 26px;
-            margin-bottom: 24px;
+            padding: 20px 24px;
+            margin-bottom: 22px;
         }
 
         .speaking-tips-box h3 {
             color: #b45309;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
@@ -949,13 +988,13 @@
         }
 
         .speaking-tips-list li {
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.88);
             padding: 12px 16px;
             border-radius: 12px;
             font-weight: 700;
             color: #78350f;
             border-left: 5px solid #f59e0b;
-            font-size: 1.05rem;
+            font-size: 1.02rem;
             line-height: 1.65;
         }
 
@@ -964,8 +1003,8 @@
             background: #eff6ff;
             border: 2px solid #bfdbfe;
             border-radius: 16px;
-            padding: 14px 20px;
-            margin-bottom: 20px;
+            padding: 12px 18px;
+            margin-bottom: 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -976,20 +1015,86 @@
         .creation-quick-bar .hint {
             font-weight: 800;
             color: #1e3a8a;
-            font-size: 1rem;
+            font-size: 0.96rem;
+        }
+
+        /* 點擊「完成」後顯示的完整講稿預覽與普通話朗讀面板 */
+        .completed-speech-card {
+            display: none;
+            background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+            border: 3px solid #10b981;
+            border-radius: 20px;
+            padding: 22px 26px;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+            animation: fadeIn 0.35s ease;
+        }
+
+        .completed-speech-card.show {
+            display: block;
+        }
+
+        .completed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 2px dashed #6ee7b7;
+        }
+
+        .completed-title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #065f46;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .completed-meta-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meta-pill {
+            background: white;
+            border: 2px solid #a7f3d0;
+            color: #047857;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .completed-fulltext-box {
+            background: white;
+            border-radius: 14px;
+            padding: 18px 22px;
+            border-left: 6px solid #10b981;
+            font-size: 1.2rem;
+            line-height: 1.9;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
         }
 
         .creation-workspace-layout {
             display: flex;
-            gap: 24px;
+            gap: 22px;
             align-items: flex-start;
         }
 
         .worksheet-container {
             flex: 1;
+            width: 100%;
             background: white;
             border-radius: 16px;
-            padding: 28px;
+            padding: 24px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.06);
             border: 2px solid #cbd5e1;
         }
@@ -1007,24 +1112,25 @@
             border: 2px solid #0f172a;
             padding: 14px 16px;
             vertical-align: top;
-            font-size: 1.08rem;
+            font-size: 1.05rem;
         }
 
         .ws-name-row {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 900;
-            padding: 16px !important;
+            padding: 14px !important;
             background: #f8fafc;
         }
 
         .ws-inline-input {
             border: none;
             border-bottom: 2px solid #0f172a;
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 800;
             padding: 4px 10px;
-            width: 260px;
+            width: 240px;
+            max-width: 70%;
             text-align: center;
             background: transparent;
             color: #0f172a;
@@ -1042,12 +1148,12 @@
             background: #f8fafc;
             font-weight: 800;
             color: #0f172a;
-            line-height: 1.6;
+            line-height: 1.55;
         }
 
         .ws-section-banner {
             text-align: center;
-            font-size: 1.45rem;
+            font-size: 1.35rem;
             font-weight: 900;
             background: #f1f5f9;
             letter-spacing: 4px;
@@ -1059,7 +1165,7 @@
             border: 2px solid #cbd5e1;
             border-radius: 10px;
             padding: 10px 14px;
-            font-size: 1.08rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #0f172a;
             outline: none;
@@ -1075,9 +1181,9 @@
             width: 100%;
             border: 2px solid #cbd5e1;
             border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 1.12rem;
-            line-height: 1.75;
+            padding: 12px 14px;
+            font-size: 1.05rem;
+            line-height: 1.7;
             font-weight: 600;
             color: #0f172a;
             resize: vertical;
@@ -1093,7 +1199,7 @@
         .ws-core-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 14px;
             align-items: center;
         }
 
@@ -1105,38 +1211,73 @@
         }
 
         .ws-ref-btn {
-            margin-top: 12px;
+            margin-top: 8px;
             width: 100%;
-            padding: 8px 10px;
+            padding: 7px 10px;
             border-radius: 10px;
             border: 2px solid #f59e0b;
             background: #fffbeb;
             color: #b45309;
             font-weight: 800;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .ws-ref-btn:hover {
             background: #fef3c7;
-            transform: translateY(-2px);
         }
 
-        /* 創作頁側邊即時範例參考面板 */
+        .ws-listen-seg-btn {
+            margin-top: 6px;
+            width: 100%;
+            padding: 7px 10px;
+            border-radius: 10px;
+            border: 2px solid #f43f5e;
+            background: #fff1f2;
+            color: #be123c;
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .ws-listen-seg-btn:hover {
+            background: #ffe4e6;
+        }
+
+        /* 創作頁底部「完成」與「聆聽」大型操作區 */
+        .worksheet-bottom-actions {
+            margin-top: 22px;
+            padding: 18px 22px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        /* 創作頁範例參考面板 */
         .side-ref-drawer {
             width: 360px;
             background: linear-gradient(145deg, #ffffff 0%, #eff6ff 100%);
-            border: 3px solid #93c5fd;
+            border: 3px solid #3b82f6;
             border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.15);
+            padding: 18px;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
             position: sticky;
-            top: 20px;
+            top: 80px;
             display: none;
             animation: fadeIn 0.25s ease;
         }
@@ -1149,20 +1290,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 2px dashed #bfdbfe;
         }
 
         .side-ref-tabs {
             display: flex;
             gap: 6px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .side-ref-tab {
             flex: 1;
-            padding: 6px 8px;
+            padding: 7px 8px;
             border-radius: 8px;
             border: 2px solid #cbd5e1;
             background: white;
@@ -1180,37 +1321,68 @@
         .side-ref-content-box {
             background: white;
             border-radius: 12px;
-            padding: 16px;
+            padding: 12px 14px;
             border-left: 6px solid var(--primary);
-            font-size: 1.08rem;
-            line-height: 1.75;
+            font-size: 1rem;
+            line-height: 1.65;
             font-weight: 700;
             color: #1e293b;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
+            max-height: 32vh;
+            overflow-y: auto;
         }
 
-        /* 懸浮「返回我的創作空間」按鈕（當學生在創作途中切換去看題目時顯示） */
+        /* 懸浮「返回我的創作空間」按鈕 */
         .floating-return-creation {
             position: fixed;
-            bottom: 22px;
-            right: 24px;
-            z-index: 999;
+            bottom: 18px;
+            right: 18px;
+            left: auto;
+            z-index: 950;
             background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
             color: white;
-            padding: 14px 24px;
+            padding: 12px 20px;
             border-radius: 999px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 900;
             border: 3px solid white;
             box-shadow: 0 10px 25px rgba(124, 58, 237, 0.45);
             cursor: pointer;
             display: none;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 8px;
             animation: bounceSlow 2s infinite;
         }
 
-        /* 列印 / 匯出 PDF 專用隱藏區與樣式 */
+        /* 隱藏的專門供 PDF 匯出使用的標準 A4 表格模板 */
+        #pdfExportTemplateWrapper {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 760px;
+            background: white;
+            padding: 20px;
+            z-index: -1;
+        }
+
+        .pdf-standard-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #000;
+            font-family: "Microsoft JhengHei", "PingFang HK", serif;
+            color: #000;
+        }
+
+        .pdf-standard-table td {
+            border: 1.5px solid #000;
+            padding: 12px 14px;
+            vertical-align: top;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        /* 列印專用樣式 */
         .print-only-text {
             display: none;
             white-space: pre-wrap;
@@ -1228,8 +1400,11 @@
             .top-utility-bar,
             .page-header,
             .creation-quick-bar,
+            .completed-speech-card,
+            .worksheet-bottom-actions,
             .side-ref-drawer,
             .ws-ref-btn,
+            .ws-listen-seg-btn,
             .topic-preset-btns,
             .floating-return-creation,
             .no-print {
@@ -1263,28 +1438,193 @@
                 border-bottom: 1.5px solid #000;
                 text-align: center;
             }
+            .speech-worksheet-table,
+            .speech-worksheet-table tbody {
+                display: table-row-group !important;
+                width: 100% !important;
+            }
+            .speech-worksheet-table tr {
+                display: table-row !important;
+            }
             .speech-worksheet-table th,
             .speech-worksheet-table td {
+                display: table-cell !important;
                 border: 1.5px solid #000 !important;
                 background: white !important;
                 color: #000 !important;
             }
         }
 
+        /* ================= 手機與平板響應式優化 ================= */
         @media (max-width: 900px) {
-            .creation-workspace-layout { flex-direction: column; }
-            .side-ref-drawer { width: 100%; position: static; }
-            .ws-core-grid { grid-template-columns: 1fr; }
+            .creation-workspace-layout {
+                flex-direction: column;
+            }
+            .side-ref-drawer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
+                width: 100%;
+                max-height: 46vh;
+                border-radius: 20px 20px 0 0;
+                z-index: 980;
+                padding: 14px 16px 18px;
+                box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.22);
+                overflow-y: auto;
+            }
+            .side-ref-content-box {
+                max-height: 18vh;
+                font-size: 0.95rem;
+                padding: 10px 12px;
+            }
+            .ws-core-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
         }
 
-        @media (max-width: 768px) {
-            .main-title { font-size: 2.1rem; }
-            .topics-grid { grid-template-columns: 1fr; }
-            .demo-stage { padding: 24px 20px; }
-            .demo-text-content { font-size: 1.25rem; padding: 20px; }
-            .analysis-popup-box { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .watch-video-pill, .pet-click-pill { font-size: 0.78rem; padding: 5px 10px; }
-            .deep-dive-overlay-btn { font-size: 0.95rem; padding: 8px 14px; }
+        @media (max-width: 680px) {
+            body {
+                padding: 10px;
+                padding-bottom: 95px;
+            }
+            .top-utility-bar {
+                padding: 8px 12px;
+                top: 4px;
+            }
+            .brand-badge {
+                font-size: 1rem;
+            }
+            .timer-label-text {
+                display: none;
+            }
+            .view-section {
+                padding: 16px 14px;
+                border-radius: 18px;
+            }
+            .main-title {
+                font-size: 1.85rem;
+            }
+            .sub-title {
+                font-size: 1rem;
+            }
+            .btn-demo-hero,
+            .btn-create-hero {
+                width: 100%;
+                font-size: 1.08rem;
+                padding: 12px 18px;
+            }
+            .topics-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+            .page-header h2 {
+                font-size: 1.2rem !important;
+            }
+            .top-right-nav {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .top-right-nav .btn {
+                padding: 8px 12px;
+                font-size: 0.88rem;
+                flex: 1 1 auto;
+            }
+            .demo-stage {
+                padding: 18px 14px;
+            }
+            .demo-label-badge {
+                font-size: 1.25rem;
+                padding: 6px 16px;
+            }
+            .demo-step-header {
+                padding: 8px 18px;
+            }
+            .demo-step-title {
+                font-size: 1.5rem;
+            }
+            .demo-step-subtitle {
+                font-size: 1.05rem;
+            }
+            .demo-text-content {
+                font-size: 1.18rem;
+                padding: 16px;
+                line-height: 1.9;
+            }
+            .analysis-popup-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 14px;
+            }
+
+            .watch-video-pill .pill-prefix,
+            .pet-click-pill .pill-prefix {
+                display: none;
+            }
+            .watch-video-pill,
+            .pet-click-pill {
+                font-size: 0.78rem;
+                padding: 4px 10px;
+                border-width: 1.5px;
+            }
+            .country-hotspot,
+            .pet-hotspot {
+                padding-bottom: 6px;
+            }
+            .deep-dive-overlay-btn {
+                font-size: 0.82rem;
+                padding: 6px 12px;
+                left: 2%;
+                top: 39%;
+                border-width: 2px;
+            }
+
+            /* 手機版「發言講稿」表格自動轉為上下堆疊卡片式 */
+            .worksheet-container {
+                padding: 12px;
+            }
+            .speech-worksheet-table,
+            .speech-worksheet-table tbody,
+            .speech-worksheet-table tr,
+            .speech-worksheet-table td {
+                display: block;
+                width: 100%;
+            }
+            .speech-worksheet-table tr {
+                border-bottom: 2px solid #0f172a;
+            }
+            .speech-worksheet-table tr:last-child {
+                border-bottom: none;
+            }
+            .speech-worksheet-table td {
+                border: none;
+                padding: 10px 12px;
+            }
+            .ws-label-col {
+                width: 100%;
+                border-bottom: 1px dashed #cbd5e1 !important;
+                background: #f1f5f9;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 6px;
+            }
+            .ws-ref-btn,
+            .ws-listen-seg-btn {
+                margin-top: 4px;
+                width: 100%;
+            }
+            .floating-return-creation {
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+                font-size: 0.92rem;
+                padding: 12px 16px;
+            }
         }
     </style>
 </head>
@@ -1299,8 +1639,8 @@
 
         <div class="top-bar-right">
             <button class="btn btn-purple btn-sm" onclick="openCreationSpace()">✍️ 我的創作空間</button>
-            <div class="timer-box">
-                <span>⏱️ 1分鐘計時：</span>
+            <div class="timer-box" id="timerBoxContainer">
+                <span>⏱️ <span class="timer-label-text">1分鐘計時：</span></span>
                 <span id="timerDisplay" class="timer-display">01:00</span>
                 <button class="btn btn-primary btn-sm" id="timerStartBtn" onclick="toggleTimer()">開始</button>
                 <button class="btn btn-outline btn-sm" onclick="resetTimer()">重設</button>
@@ -1333,7 +1673,7 @@
                 <div class="topic-card-body">
                     <div>
                         <div class="topic-card-title">你會選擇以下哪個國家旅行？</div>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">點擊觀看日本、法國、巴西影片並練習發言</p>
+                        <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 4px;">點擊觀看日本、法國、巴西影片並練習發言</p>
                     </div>
                     <span class="btn btn-primary">進入題目 ➔</span>
                 </div>
@@ -1348,7 +1688,7 @@
                 <div class="topic-card-body">
                     <div>
                         <div class="topic-card-title">你會飼養以下哪種寵物？</div>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">點擊狗、鸚鵡、鬆獅蜥蜴查看介紹與「深入了解」</p>
+                        <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 4px;">點擊狗、鸚鵡、鬆獅蜥蜴查看介紹與「深入了解」</p>
                     </div>
                     <span class="btn btn-secondary">進入題目 ➔</span>
                 </div>
@@ -1356,10 +1696,10 @@
         </div>
     </main>
 
-    <!-- ==================== 2. 表達意見示範頁 (A1 - A3 含點擊內容分析) ==================== -->
+    <!-- ==================== 2. 表達意見示範頁 (A1 - A3 含點擊分析、隱藏所有標籤及普通話發音) ==================== -->
     <section id="view-demo" class="view-section">
         <div class="page-header">
-            <h2 style="font-size: 1.5rem; color: var(--primary-dark);">💡 表達意見示範（三段式結構與內容分析）</h2>
+            <h2 style="font-size: 1.45rem; color: var(--primary-dark);">💡 表達意見示範（三段式結構與普通話示範）</h2>
             <div class="top-right-nav">
                 <button class="btn btn-outline" id="returnFromDemoBtn" onclick="returnFromDemo()" style="display: none;">↩️ 返回剛才頁面</button>
                 <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
@@ -1373,7 +1713,7 @@
             <div>
                 <div class="demo-top-row">
                     <div class="demo-label-badge">說話示範</div>
-                    <div style="font-weight: 800; color: var(--text-muted); font-size: 1.1rem;" id="demoPageCounter">第 1 / 3 頁</div>
+                    <div style="font-weight: 800; color: var(--text-muted); font-size: 1.05rem;" id="demoPageCounter">第 1 / 3 頁</div>
                 </div>
 
                 <div style="text-align: center;">
@@ -1383,19 +1723,38 @@
                     </div>
                 </div>
 
+                <!-- 互動內容分析與普通話朗讀工具列 -->
                 <div class="analysis-instruction-bar">
-                    <span>👆 <strong>互動內容分析：</strong>請直接點擊下方不同句子或詞語，查看屬於哪一部分結構！</span>
-                    <button class="btn btn-outline btn-sm" id="toggleAllTagsBtn" onclick="toggleAllInlineTags()">🏷️ 顯示全部結構標籤</button>
+                    <span>👆 <strong>互動分析與發音：</strong>點擊下方句子可查看結構分析；亦可點擊右側按鍵聆聽普通話或隱藏所有標籤！</span>
+                    <div class="demo-toolbar-actions">
+                        <button class="btn btn-rose btn-sm" id="speakDemoPageBtn" onclick="speakCurrentDemoPage()">
+                            🔊 聆聽本頁普通話
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="stopDemoSpeechBtn" onclick="stopMandarinSpeech()" style="display: none;">
+                            ⏹️ 停止發音
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="showAllTagsBtn" onclick="showAllInlineTags()">
+                            🏷️ 顯示全部標籤
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="hideAllTagsBtn" onclick="hideAllInlineTags()">
+                            🙈 隱藏所有標籤
+                        </button>
+                    </div>
                 </div>
 
+                <!-- 示範文字區 -->
                 <div class="demo-text-content demo-color-p1" id="demoTextContent"></div>
 
+                <!-- 點擊句子後顯示的分析與單句普通話朗讀面板 -->
                 <div class="analysis-popup-box" id="analysisPopupBox">
                     <span class="analysis-badge-large" id="analysisBadge" style="background: #64748b;">🔍 內容分析</span>
                     <div class="analysis-detail-body">
                         <div class="analysis-quote" id="analysisQuote">請點擊上方示範文字中的任何句子或「……方面」字眼</div>
                         <div class="analysis-desc" id="analysisDesc">系統會在此處即時顯示該句屬於「立場」、「觀點」、「分類說明」、「舉例說明」或「拓展(指出優點/效果)」。</div>
                     </div>
+                    <button class="btn btn-rose btn-sm" id="speakSingleSegBtn" style="display: none;" onclick="speakSelectedSegment()">
+                        🔊 聆聽此句普通話
+                    </button>
                 </div>
             </div>
 
@@ -1406,7 +1765,7 @@
     <!-- ==================== 3. 題目一：B1.jpg 看影片表達意見 ==================== -->
     <section id="view-topic-b" class="view-section">
         <div class="page-header">
-            <h2 style="font-size: 1.5rem; color: var(--primary-dark);">🎬 看影片表達意見：你會選擇以下哪個國家旅行？</h2>
+            <h2 style="font-size: 1.45rem; color: var(--primary-dark);">🎬 看影片表達意見：你會選擇以下哪個國家旅行？</h2>
             <div class="top-right-nav">
                 <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
                 <button class="btn btn-accent" onclick="openDemo(1, 'topic-b')">💡 看示範</button>
@@ -1414,7 +1773,7 @@
             </div>
         </div>
 
-        <p style="text-align: center; color: var(--text-muted); font-weight: 700; margin-bottom: 14px; font-size: 1.1rem;">
+        <p style="text-align: center; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; font-size: 1.02rem;">
             👇 請直接點擊下方圖片中的「日本」、「法國」或「巴西」觀看介紹影片：
         </p>
 
@@ -1422,15 +1781,15 @@
             <img src="B1.jpg" alt="你會選擇以下哪個國家旅行？" class="main-b1-img">
 
             <div class="country-hotspot hotspot-japan" onclick="openVideo('日本', 'V1.mp4')" title="點擊觀看日本影片">
-                <span class="watch-video-pill">▶️ 點擊看影片：日本</span>
+                <span class="watch-video-pill">▶️ <span class="pill-prefix">點擊看影片：</span>日本</span>
             </div>
 
             <div class="country-hotspot hotspot-france" onclick="openVideo('法國', 'V2.mp4')" title="點擊觀看法國影片">
-                <span class="watch-video-pill">▶️ 點擊看影片：法國</span>
+                <span class="watch-video-pill">▶️ <span class="pill-prefix">點擊看影片：</span>法國</span>
             </div>
 
             <div class="country-hotspot hotspot-brazil" onclick="openVideo('巴西', 'V3.mp4')" title="點擊觀看巴西影片">
-                <span class="watch-video-pill">▶️ 點擊看影片：巴西</span>
+                <span class="watch-video-pill">▶️ <span class="pill-prefix">點擊看影片：</span>巴西</span>
             </div>
         </div>
 
@@ -1444,7 +1803,7 @@
     <!-- ==================== 3-1. 國家影片播放頁 ==================== -->
     <section id="view-video-player" class="view-section">
         <div class="page-header">
-            <h2 style="font-size: 1.5rem; color: var(--primary-dark);">🎬 觀看國家介紹影片</h2>
+            <h2 style="font-size: 1.45rem; color: var(--primary-dark);">🎬 觀看國家介紹影片</h2>
             <div class="top-right-nav">
                 <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目</button>
                 <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
@@ -1463,8 +1822,8 @@
                 </video>
             </div>
 
-            <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
-                <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目（重新選擇其他國家）</button>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 14px;">
+                <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目（重選國家）</button>
                 <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 前往我的創作空間寫講稿</button>
                 <button class="btn btn-accent" onclick="openDemo(1, 'video-player')">💡 看示範</button>
             </div>
@@ -1474,7 +1833,7 @@
     <!-- ==================== 4. 題目二：寵物題目（含「深入了解」按鈕） ==================== -->
     <section id="view-topic-d" class="view-section">
         <div class="page-header">
-            <h2 style="font-size: 1.5rem; color: var(--secondary);">🐾 看圖片表達意見：你會飼養以下哪種寵物？</h2>
+            <h2 style="font-size: 1.45rem; color: var(--secondary);">🐾 看圖片表達意見：你會飼養以下哪種寵物？</h2>
             <div class="top-right-nav">
                 <button class="btn btn-outline" id="backToD1Btn" onclick="renderDPage(1)" style="display: none;">🐾 返回寵物題目頁</button>
                 <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
@@ -1488,13 +1847,12 @@
         <div class="d-slide-container">
             <div class="d-top-status-row">
                 <div class="d-page-indicator" id="dPageIndicator">寵物題目頁：你會飼養以下哪種寵物？</div>
-                <!-- 當在狗(一)[D2]、鸚鵡(一)[D4]、鬆獅蜥蜴(一)[D6] 時顯示的頂部深入了解按鈕 -->
-                <button class="btn btn-purple" id="topDeepDiveBtn" style="display: none;" onclick="triggerCurrentDeepDive()">
+                <button class="btn btn-purple btn-sm" id="topDeepDiveBtn" style="display: none;" onclick="triggerCurrentDeepDive()">
                     🔎 深入了解此寵物
                 </button>
             </div>
 
-            <p id="d1ClickHint" style="color: var(--text-muted); font-weight: 700; margin-bottom: 12px; font-size: 1.1rem;">
+            <p id="d1ClickHint" style="color: var(--text-muted); font-weight: 700; margin-bottom: 12px; font-size: 1.02rem;">
                 👇 請直接點擊下方圖片中的「狗」、「鸚鵡」或「鬆獅蜥蜴」查看詳細資料：
             </p>
 
@@ -1504,15 +1862,15 @@
                 <!-- 僅在寵物題目頁顯示的「狗」、「鸚鵡」、「鬆獅蜥蜴」圖片點擊按鍵層 -->
                 <div id="d1HotspotsLayer" class="d1-hotspots-layer">
                     <div class="pet-hotspot hotspot-dog" onclick="renderDPage(2)" title="點擊查看「狗」資料">
-                        <span class="pet-click-pill">🐶 點擊看：狗</span>
+                        <span class="pet-click-pill">🐶 <span class="pill-prefix">點擊看：</span>狗</span>
                     </div>
 
                     <div class="pet-hotspot hotspot-parrot" onclick="renderDPage(4)" title="點擊查看「鸚鵡」資料">
-                        <span class="pet-click-pill">🦜 點擊看：鸚鵡</span>
+                        <span class="pet-click-pill">🦜 <span class="pill-prefix">點擊看：</span>鸚鵡</span>
                     </div>
 
                     <div class="pet-hotspot hotspot-lizard" onclick="renderDPage(6)" title="點擊查看「鬆獅蜥蜴」資料">
-                        <span class="pet-click-pill">🦎 點擊看：鬆獅蜥蜴</span>
+                        <span class="pet-click-pill">🦎 <span class="pill-prefix">點擊看：</span>鬆獅蜥蜴</span>
                     </div>
                 </div>
 
@@ -1538,7 +1896,7 @@
     <!-- ==================== 5. 三種動物「深入了解」趣味詳細介紹頁面 ==================== -->
     <section id="view-pet-detail" class="view-section">
         <div class="page-header">
-            <h2 style="font-size: 1.5rem; color: var(--purple-dark);" id="petDetailHeaderTitle">🔎 寵物深入了解趣味百科</h2>
+            <h2 style="font-size: 1.45rem; color: var(--purple-dark);" id="petDetailHeaderTitle">🔎 寵物深入了解趣味百科</h2>
             <div class="top-right-nav">
                 <button class="btn btn-secondary" id="backToPetSlideBtn" onclick="returnToPetSlide()">↩️ 返回寵物資料圖卡</button>
                 <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
@@ -1547,26 +1905,27 @@
             </div>
         </div>
 
-        <div id="petDetailContentContainer">
-            <!-- 由 JavaScript 動態渲染狗、鸚鵡或鬆獅蜥蜴的豐富趣味百科內容與思考引導問題 -->
-        </div>
+        <div id="petDetailContentContainer"></div>
 
-        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 20px; padding-top: 18px; border-top: 2px dashed #e2e8f0;">
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 2px dashed #e2e8f0;">
             <span style="font-weight: 800; color: var(--text-muted); align-self: center;">切換深入了解其他寵物：</span>
-            <button class="btn btn-outline" onclick="openPetDetail('dog', 2)">🐶 深入了解：狗</button>
-            <button class="btn btn-outline" onclick="openPetDetail('parrot', 4)">🦜 深入了解：鸚鵡</button>
-            <button class="btn btn-outline" onclick="openPetDetail('lizard', 6)">🦎 深入了解：鬆獅蜥蜴</button>
+            <button class="btn btn-outline btn-sm" onclick="openPetDetail('dog', 2)">🐶 深入了解：狗</button>
+            <button class="btn btn-outline btn-sm" onclick="openPetDetail('parrot', 4)">🦜 深入了解：鸚鵡</button>
+            <button class="btn btn-outline btn-sm" onclick="openPetDetail('lizard', 6)">🦎 深入了解：鬆獅蜥蜴</button>
         </div>
     </section>
 
-    <!-- ==================== 6. 我的創作空間（個人講稿創作頁面） ==================== -->
+    <!-- ==================== 6. 我的創作空間（個人講稿創作頁面：含「完成」與「聆聽」普通話功能） ==================== -->
     <section id="view-creation" class="view-section">
         <div class="page-header">
-            <h2 style="font-size: 1.6rem; color: var(--purple-dark);">✍️ 我的創作空間（個人發言講稿創作）</h2>
+            <h2 style="font-size: 1.5rem; color: var(--purple-dark);">✍️ 我的創作空間（個人發言講稿創作）</h2>
             <div class="top-right-nav">
-                <button class="btn btn-primary" onclick="downloadWordDoc()">📄 下載 WORD (.doc)</button>
-                <button class="btn btn-secondary" onclick="downloadPdfDoc()">🖨️ 下載 PDF</button>
-                <button class="btn btn-outline" onclick="clearWorksheet()">🗑️ 清空重寫</button>
+                <button class="btn btn-secondary" onclick="completeWorksheet()">✅ 完成</button>
+                <button class="btn btn-rose" id="topListenFullDraftBtn" onclick="speakStudentFullDraft()">🔊 聆聽</button>
+                <button class="btn btn-outline" id="stopDraftSpeechBtn" onclick="stopMandarinSpeech()" style="display: none;">⏹️ 停止</button>
+                <button class="btn btn-primary" onclick="downloadWordDoc()">📄 下載 WORD</button>
+                <button class="btn btn-purple" id="downloadPdfBtn" onclick="downloadPdfDoc()">🖨️ 下載 PDF</button>
+                <button class="btn btn-outline" onclick="clearWorksheet()">🗑️ 清空</button>
                 <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
             </div>
         </div>
@@ -1574,12 +1933,30 @@
         <!-- 頂部快速切換至題目與示範工具列（不影響已輸入內容） -->
         <div class="creation-quick-bar">
             <div class="hint">
-                💡 <strong>貼心提示：</strong>您輸入的內容會自動保存！創作期間可隨時切換觀看題目圖片或影片，內容絕不會消失。
+                💡 <strong>自動保存：</strong>創作期間可隨時切換觀看題目圖片或影片；寫完後點擊<strong>「✅ 完成」</strong>及<strong>「🔊 聆聽」</strong>即可聽取自己稿件的普通話發音！
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn btn-primary btn-sm" onclick="switchToTopicFromCreation('topic-b')">🎬 切換看：國家旅行題目</button>
                 <button class="btn btn-secondary btn-sm" onclick="switchToTopicFromCreation('topic-d')">🐾 切換看：飼養寵物題目</button>
-                <button class="btn btn-accent btn-sm" onclick="toggleSideReference(1)">📖 開啟／關閉右側範例對照</button>
+                <button class="btn btn-accent btn-sm" onclick="toggleSideReference(1)">📖 開啟／關閉範例參考</button>
+            </div>
+        </div>
+
+        <!-- 點擊「完成」後呈現的完整發言稿預覽與普通話朗讀面板 -->
+        <div class="completed-speech-card" id="completedSpeechCard">
+            <div class="completed-header">
+                <div class="completed-title">🎉 講稿已完成！以下是你的 1 分鐘完整發言稿：</div>
+                <div class="completed-meta-badges">
+                    <span class="meta-pill" id="completedWordCountPill">總字數：0 字</span>
+                    <span class="meta-pill" id="completedDurationPill">預估普通話朗讀：約 0 秒</span>
+                </div>
+            </div>
+            <div class="completed-fulltext-box" id="completedFullTextBox"></div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+                <button class="btn btn-rose" onclick="speakStudentFullDraft()">🔊 聆聽完整稿件普通話發音</button>
+                <button class="btn btn-outline" onclick="stopMandarinSpeech()">⏹️ 停止發音</button>
+                <button class="btn btn-primary" onclick="downloadWordDoc()">📄 下載 WORD</button>
+                <button class="btn btn-purple" onclick="downloadPdfDoc()">🖨️ 下載 PDF</button>
             </div>
         </div>
 
@@ -1636,11 +2013,15 @@
                         <!-- 第一段論式 -->
                         <tr>
                             <td class="ws-label-col">
-                                <div>第一段論式</div>
-                                <div>1 個立場</div>
-                                <div>2 個觀點</div>
+                                <div>
+                                    <div>第一段論式</div>
+                                    <div>1 個立場、2 個觀點</div>
+                                </div>
                                 <button type="button" class="ws-ref-btn" onclick="openSideReferenceStep(1)">
                                     📖 打開第一段範例參考
+                                </button>
+                                <button type="button" class="ws-listen-seg-btn" onclick="speakStudentStage(1)">
+                                    🔊 聆聽第一段普通話
                                 </button>
                             </td>
                             <td>
@@ -1652,12 +2033,15 @@
                         <!-- 第二段論式 -->
                         <tr>
                             <td class="ws-label-col">
-                                <div>第二段論式</div>
-                                <div>3-4 個</div>
-                                <div>具體原因</div>
-                                <div>(必須舉例)</div>
+                                <div>
+                                    <div>第二段論式</div>
+                                    <div>3-4 個具體原因 (必須舉例)</div>
+                                </div>
                                 <button type="button" class="ws-ref-btn" onclick="openSideReferenceStep(2)">
                                     📖 打開第二段範例參考
+                                </button>
+                                <button type="button" class="ws-listen-seg-btn" onclick="speakStudentStage(2)">
+                                    🔊 聆聽第二段普通話
                                 </button>
                             </td>
                             <td>
@@ -1669,12 +2053,15 @@
                         <!-- 第三段論式 -->
                         <tr>
                             <td class="ws-label-col">
-                                <div>第三段論式</div>
-                                <div>總結</div>
-                                <div>(重申立場</div>
-                                <div>歸納原因)</div>
+                                <div>
+                                    <div>第三段論式</div>
+                                    <div>總結 (重申立場、歸納原因)</div>
+                                </div>
                                 <button type="button" class="ws-ref-btn" onclick="openSideReferenceStep(3)">
                                     📖 打開第三段範例參考
+                                </button>
+                                <button type="button" class="ws-listen-seg-btn" onclick="speakStudentStage(3)">
+                                    🔊 聆聽第三段普通話
                                 </button>
                             </td>
                             <td>
@@ -1693,13 +2080,26 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- 表格底部「完成」與「聆聽」主操作按鍵區 -->
+                <div class="worksheet-bottom-actions no-print">
+                    <button type="button" class="btn btn-secondary" style="font-size: 1.15rem; padding: 12px 28px;" onclick="completeWorksheet()">
+                        ✅ 完成（合成完整講稿）
+                    </button>
+                    <button type="button" class="btn btn-rose" id="bottomListenFullDraftBtn" style="font-size: 1.15rem; padding: 12px 28px;" onclick="speakStudentFullDraft()">
+                        🔊 聆聽（普通話朗讀我的講稿）
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="stopMandarinSpeech()">
+                        ⏹️ 停止發音
+                    </button>
+                </div>
             </div>
 
-            <!-- 右側：可隨時展開對照的「說話示範參考」抽屜面板 -->
+            <!-- 右側／手機底部無遮罩懸浮卡：可隨時邊看範例邊在上方打字 -->
             <aside class="side-ref-drawer" id="sideRefDrawer">
                 <div class="side-ref-header">
-                    <h3 style="color: var(--primary-dark); font-size: 1.2rem;">💡 說話示範即時參考</h3>
-                    <button class="btn btn-outline btn-sm" onclick="closeSideReference()">✖ 關閉</button>
+                    <h3 style="color: var(--primary-dark); font-size: 1.1rem;">💡 說話示範即時對照</h3>
+                    <button class="btn btn-outline btn-sm" onclick="closeSideReference()">✖ 收起</button>
                 </div>
 
                 <div class="side-ref-tabs">
@@ -1708,13 +2108,16 @@
                     <button class="side-ref-tab" id="refTab3" onclick="openSideReferenceStep(3)">第三段式</button>
                 </div>
 
-                <div id="sideRefStepTitle" style="font-weight: 900; color: #dc2626; font-size: 1.15rem; margin-bottom: 8px;">
-                    第一段式：1個立場、2個原因
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div id="sideRefStepTitle" style="font-weight: 900; color: #dc2626; font-size: 1.05rem;">
+                        第一段式：1個立場、2個原因
+                    </div>
+                    <button class="btn btn-rose btn-sm" onclick="speakSideRefExample()">🔊 聆聽範例</button>
                 </div>
 
                 <div class="side-ref-content-box" id="sideRefContentBox"></div>
 
-                <div style="background: #fef3c7; border-radius: 10px; padding: 12px; font-size: 0.92rem; color: #92400e; font-weight: 700; margin-bottom: 12px;" id="sideRefStructureTip"></div>
+                <div style="background: #fef3c7; border-radius: 10px; padding: 8px 12px; font-size: 0.88rem; color: #92400e; font-weight: 700; margin-bottom: 10px;" id="sideRefStructureTip"></div>
 
                 <button class="btn btn-accent btn-sm" style="width: 100%;" onclick="openDemoFromCreation()">
                     🔍 前往全螢幕互動分析示範頁
@@ -1723,9 +2126,55 @@
         </div>
     </section>
 
-    <!-- 懸浮「返回我的創作空間」快捷鍵（當學生從創作空間切換去看題目時顯示） -->
+    <!-- 隱藏的標準 A4 PDF 匯出專用模板 -->
+    <div id="pdfExportTemplateWrapper">
+        <div id="pdfExportTarget" style="padding: 15px; background: white; color: black;">
+            <table class="pdf-standard-table">
+                <tr>
+                    <td colspan="2" style="text-align: center; font-size: 20px; font-weight: bold; padding: 16px;">
+                        姓名：<span id="pdf_ws_name" style="text-decoration: underline;">        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 24%; font-weight: bold;">討論主題：</td>
+                    <td id="pdf_ws_topic"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">圍繞核心：</td>
+                    <td id="pdf_ws_cores"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center; font-size: 18px; font-weight: bold; background: #f8fafc;">發言稿</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">
+                        第一段論式<br>1 個立場<br>2 個觀點
+                    </td>
+                    <td id="pdf_ws_stage1" style="min-height: 110px; white-space: pre-wrap;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">
+                        第二段論式<br>3-4 個<br>具體原因<br>(必須舉例)
+                    </td>
+                    <td id="pdf_ws_stage2" style="min-height: 260px; white-space: pre-wrap;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">
+                        第三段論式<br>總結<br>(重申立場<br>歸納原因)
+                    </td>
+                    <td id="pdf_ws_stage3" style="min-height: 110px; white-space: pre-wrap;"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">成績：</td>
+                    <td id="pdf_ws_grade"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 懸浮「返回我的創作空間」快捷鍵 -->
     <button id="floatingReturnCreationBtn" class="floating-return-creation" onclick="openCreationSpace()">
-        ✍️ 返回「我的創作空間」繼續寫稿（內容已保存）
+        ✍️ 返回「我的創作空間」繼續寫稿
     </button>
 
     <script>
@@ -1738,6 +2187,7 @@
         let activePetDetailOriginSlide = 2;
         let isCreationSessionActive = false;
         let currentSideRefStep = 1;
+        let lastSelectedSegmentText = '';
 
         // A1-A3 說話示範與點擊分析資料
         const demoPagesData = {
@@ -1912,7 +2362,7 @@
             7: { navLabel: "鬆獅蜥蜴 (二)", title: "🦎 鬆獅蜥蜴：食物與互動性", deepDiveKey: null }
         };
 
-        // 三種動物「深入了解」趣味百科資料（「1分鐘發言靈感百寶箱」全面改為純問題引導思考，不提供完整句子）
+        // 三種動物「深入了解」趣味百科資料（「1分鐘發言靈感百寶箱」全面採用純問題引導思考）
         const petDeepDiveData = {
             dog: {
                 name: "🐶 狗狗趣味百科檔案",
@@ -2015,6 +2465,130 @@
             }
         };
 
+        // ================= 普通話語音合成引擎 (Putonghua / Mandarin TTS) =================
+        let availableVoices = [];
+
+        function loadSpeechVoices() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            loadSpeechVoices();
+            window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
+        }
+
+        function getBestMandarinVoice() {
+            if (!availableVoices || availableVoices.length === 0) {
+                availableVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+            }
+            // 優先選擇標準普通話 (zh-CN) 或國語 (zh-TW) 語音，排除粵語 (zh-HK / Cantonese)
+            const exactCN = availableVoices.find(v =>
+                (v.lang === 'zh-CN' || v.lang === 'zh_CN' || v.lang === 'cmn-Hans-CN') &&
+                !v.name.toLowerCase().includes('cantonese') &&
+                !v.name.includes('粵')
+            );
+            if (exactCN) return exactCN;
+
+            const exactTW = availableVoices.find(v =>
+                (v.lang === 'zh-TW' || v.lang === 'zh_TW' || v.lang === 'cmn-Hant-TW') &&
+                !v.name.toLowerCase().includes('cantonese')
+            );
+            if (exactTW) return exactTW;
+
+            const anyMandarin = availableVoices.find(v =>
+                v.lang.toLowerCase().startsWith('zh') &&
+                !v.lang.toLowerCase().includes('hk') &&
+                !v.name.toLowerCase().includes('cantonese')
+            );
+            return anyMandarin || null;
+        }
+
+        function playMandarinText(textToSpeak, activeBtnId = null) {
+            if (!('speechSynthesis' in window)) {
+                alert('您的瀏覽器不支援語音朗讀功能，建議使用 Chrome、Edge 或 Safari 瀏覽器。');
+                return;
+            }
+            const cleanText = String(textToSpeak || '').trim();
+            if (!cleanText) {
+                alert('目前沒有可朗讀的文字內容喔！');
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            // 處理「3/4句」在語音中的自然讀法
+            const normalizedText = cleanText.replace(/3\/4句/g, '三至四句');
+
+            const utterance = new SpeechSynthesisUtterance(normalizedText);
+            const mandarinVoice = getBestMandarinVoice();
+            if (mandarinVoice) {
+                utterance.voice = mandarinVoice;
+                utterance.lang = mandarinVoice.lang;
+            } else {
+                utterance.lang = 'zh-CN';
+            }
+            utterance.rate = 0.95; // 適合教學示範的清晰語速
+            utterance.pitch = 1.0;
+
+            const stopDemoBtn = document.getElementById('stopDemoSpeechBtn');
+            const stopDraftBtn = document.getElementById('stopDraftSpeechBtn');
+            if (stopDemoBtn) stopDemoBtn.style.display = 'inline-flex';
+            if (stopDraftBtn) stopDraftBtn.style.display = 'inline-flex';
+
+            document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
+            if (activeBtnId) {
+                const btn = document.getElementById(activeBtnId);
+                if (btn) btn.classList.add('speaking-active');
+            }
+
+            utterance.onend = () => {
+                resetSpeechUI();
+            };
+            utterance.onerror = () => {
+                resetSpeechUI();
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopMandarinSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            resetSpeechUI();
+        }
+
+        function resetSpeechUI() {
+            const stopDemoBtn = document.getElementById('stopDemoSpeechBtn');
+            const stopDraftBtn = document.getElementById('stopDraftSpeechBtn');
+            if (stopDemoBtn) stopDemoBtn.style.display = 'none';
+            if (stopDraftBtn) stopDraftBtn.style.display = 'none';
+            document.querySelectorAll('.speaking-active').forEach(el => el.classList.remove('speaking-active'));
+        }
+
+        // 示範頁：朗讀整頁普通話
+        function speakCurrentDemoPage() {
+            const data = demoPagesData[currentDemoPage];
+            const fullPageText = data.paragraphs.map(pSegs => pSegs.map(s => s.text).join('')).join(' ');
+            playMandarinText(fullPageText, 'speakDemoPageBtn');
+        }
+
+        // 示範頁：朗讀單句普通話
+        function speakSelectedSegment() {
+            if (lastSelectedSegmentText) {
+                playMandarinText(lastSelectedSegmentText, 'speakSingleSegBtn');
+            }
+        }
+
+        // 創作空間側邊欄：朗讀當前參考範例
+        function speakSideRefExample() {
+            const data = demoPagesData[currentSideRefStep];
+            const fullText = data.paragraphs.map(pSegs => pSegs.map(s => s.text).join('')).join(' ');
+            playMandarinText(fullText);
+        }
+
         // ================= 頁面切換功能 =================
         function stopActiveVideo() {
             const vid = document.getElementById('countryVideoElement');
@@ -2025,6 +2599,8 @@
 
         function navigateTo(viewId) {
             stopActiveVideo();
+            stopMandarinSpeech();
+            closeSideReference();
             document.querySelectorAll('.view-section').forEach(sec => {
                 sec.classList.remove('active');
             });
@@ -2034,7 +2610,6 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
-            // 控制右下角「返回我的創作空間」懸浮按鈕顯示
             const floatBtn = document.getElementById('floatingReturnCreationBtn');
             if (viewId === 'creation' || viewId === 'home') {
                 floatBtn.style.display = 'none';
@@ -2065,27 +2640,48 @@
         }
 
         function changeDemoPage(delta) {
+            stopMandarinSpeech();
             const next = currentDemoPage + delta;
             if (next >= 1 && next <= 3) {
                 renderDemoPage(next);
             }
         }
 
-        function toggleAllInlineTags() {
-            showAllTags = !showAllTags;
+        // 顯示全部結構標籤
+        function showAllInlineTags() {
+            showAllTags = true;
             const contentBox = document.getElementById('demoTextContent');
-            const btn = document.getElementById('toggleAllTagsBtn');
-            if (showAllTags) {
-                contentBox.classList.add('show-all-tags');
-                btn.textContent = '🏷️ 隱藏全部結構標籤';
-            } else {
-                contentBox.classList.remove('show-all-tags');
-                btn.textContent = '🏷️ 顯示全部結構標籤';
-            }
+            contentBox.classList.add('show-all-tags');
+        }
+
+        // 隱藏所有標籤（同時清除單句點擊選中狀態與重置下方分析面板）
+        function hideAllInlineTags() {
+            showAllTags = false;
+            lastSelectedSegmentText = '';
+            const contentBox = document.getElementById('demoTextContent');
+            contentBox.classList.remove('show-all-tags');
+            document.querySelectorAll('.clickable-seg').forEach(el => {
+                el.classList.remove('active-seg');
+            });
+            resetAnalysisPopupBox();
+        }
+
+        function resetAnalysisPopupBox() {
+            const popupBox = document.getElementById('analysisPopupBox');
+            popupBox.classList.remove('active-analysis');
+            const badge = document.getElementById('analysisBadge');
+            badge.className = 'analysis-badge-large';
+            badge.style.background = '#64748b';
+            badge.textContent = '🔍 點擊句子查看分析';
+            document.getElementById('analysisQuote').textContent = '請點擊上方示範段落中的任何句子或「……方面」字眼';
+            document.getElementById('analysisDesc').textContent = '系統會即時顯示該部分屬於「立場」、「觀點」、「分類說明」、「舉例說明」或「拓展(指出優點/效果)」。';
+            const singleSpeakBtn = document.getElementById('speakSingleSegBtn');
+            if (singleSpeakBtn) singleSpeakBtn.style.display = 'none';
         }
 
         function renderDemoPage(pageNum) {
             currentDemoPage = pageNum;
+            lastSelectedSegmentText = '';
             const data = demoPagesData[pageNum];
 
             document.getElementById('demoPageCounter').textContent = `第 ${pageNum} / 3 頁`;
@@ -2106,18 +2702,11 @@
             });
             contentBox.innerHTML = htmlParagraphs;
 
-            const popupBox = document.getElementById('analysisPopupBox');
-            popupBox.classList.remove('active-analysis');
-            const badge = document.getElementById('analysisBadge');
-            badge.className = 'analysis-badge-large';
-            badge.style.background = '#64748b';
-            badge.textContent = '🔍 點擊句子查看分析';
-            document.getElementById('analysisQuote').textContent = '請點擊上方示範段落中的任何句子或「……方面」字眼';
-            document.getElementById('analysisDesc').textContent = '系統會即時顯示該部分屬於「立場」、「觀點」、「分類說明」、「舉例說明」或「拓展(指出優點/效果)」。';
+            resetAnalysisPopupBox();
 
             const jumpsBox = document.getElementById('demoBottomJumps');
             jumpsBox.innerHTML = data.jumps.map(j => `
-                <button class="jump-card-btn" onclick="renderDemoPage(${j.targetPage})">
+                <button class="jump-card-btn" onclick="stopMandarinSpeech(); renderDemoPage(${j.targetPage})">
                     <span class="go-text">前往</span>
                     <span class="target-text">${j.label}</span>
                 </button>
@@ -2129,6 +2718,7 @@
 
         function showSegmentAnalysis(pageNum, pIdx, sIdx, elementId) {
             const seg = demoPagesData[pageNum].paragraphs[pIdx][sIdx];
+            lastSelectedSegmentText = seg.text;
 
             document.querySelectorAll('.clickable-seg').forEach(el => {
                 el.classList.remove('active-seg');
@@ -2150,6 +2740,9 @@
 
             document.getElementById('analysisQuote').textContent = `句子內容：「${seg.text}」`;
             document.getElementById('analysisDesc').textContent = seg.desc;
+
+            const singleSpeakBtn = document.getElementById('speakSingleSegBtn');
+            if (singleSpeakBtn) singleSpeakBtn.style.display = 'inline-flex';
         }
 
         // ================= 題目一：B1.jpg 與影片播放 =================
@@ -2199,7 +2792,6 @@
                 backToD1Btn.style.display = 'inline-flex';
             }
 
-            // 控制 D2(狗一)、D4(鸚鵡一)、D6(鬆獅蜥蜴一) 的「深入了解」按鈕顯示
             const deepDiveKey = dPageMeta[pageNum].deepDiveKey;
             const overlayDeepBtn = document.getElementById('imgDeepDiveOverlayBtn');
             const topDeepBtn = document.getElementById('topDeepDiveBtn');
@@ -2289,7 +2881,7 @@
             navigateTo('topic-d');
         }
 
-        // ================= 6. 我的創作空間（講稿儲存、範例對照、下載 WORD 與 PDF） =================
+        // ================= 6. 我的創作空間（完成講稿合成、普通話聆聽、下載 WORD 與 PDF） =================
         function openCreationSpace() {
             isCreationSessionActive = true;
             navigateTo('creation');
@@ -2311,10 +2903,60 @@
             openDemo(currentSideRefStep, 'creation');
         }
 
+        // 點擊「完成」按鍵：儲存並合成完整 1 分鐘講稿預覽卡
+        function completeWorksheet() {
+            saveWorksheetData();
+            const s1 = document.getElementById('ws_stage1').value.trim();
+            const s2 = document.getElementById('ws_stage2').value.trim();
+            const s3 = document.getElementById('ws_stage3').value.trim();
+
+            if (!s1 && !s2 && !s3) {
+                alert('請先在「發言稿」欄位輸入你的講稿內容，再點擊「完成」喔！');
+                return;
+            }
+
+            const combinedParagraphs = [s1, s2, s3].filter(Boolean).join('\n\n');
+            const charCount = combinedParagraphs.replace(/\s+/g, '').length;
+            const estSeconds = Math.max(1, Math.round(charCount / 3.2)); // 普通話約每秒 3.2 字
+
+            document.getElementById('completedWordCountPill').textContent = `總字數：${charCount} 字`;
+            document.getElementById('completedDurationPill').textContent = `預估普通話朗讀：約 ${estSeconds} 秒`;
+            document.getElementById('completedFullTextBox').textContent = combinedParagraphs;
+
+            const card = document.getElementById('completedSpeechCard');
+            card.classList.add('show');
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 點擊「聆聽」按鍵：用普通話朗讀學生整篇講稿
+        function speakStudentFullDraft() {
+            saveWorksheetData();
+            const s1 = document.getElementById('ws_stage1').value.trim();
+            const s2 = document.getElementById('ws_stage2').value.trim();
+            const s3 = document.getElementById('ws_stage3').value.trim();
+
+            const fullDraft = [s1, s2, s3].filter(Boolean).join('。 ');
+            if (!fullDraft) {
+                alert('請先在「發言稿」（第一、二或三段論式）輸入內容，即可點擊聆聽普通話發音！');
+                return;
+            }
+            playMandarinText(fullDraft, 'topListenFullDraftBtn');
+        }
+
+        // 分段聆聽學生寫的某一段論式
+        function speakStudentStage(stageNum) {
+            saveWorksheetData();
+            const val = document.getElementById('ws_stage' + stageNum).value.trim();
+            if (!val) {
+                alert(`請先在「第${stageNum === 1 ? '一' : stageNum === 2 ? '二' : '三'}段論式」輸入文字內容喔！`);
+                return;
+            }
+            playMandarinText(val);
+        }
+
         function openSideReferenceStep(stepNum) {
             currentSideRefStep = stepNum;
-            const drawer = document.getElementById('sideRefDrawer');
-            drawer.classList.add('open');
+            document.getElementById('sideRefDrawer').classList.add('open');
 
             [1, 2, 3].forEach(n => {
                 const tab = document.getElementById('refTab' + n);
@@ -2336,14 +2978,15 @@
         function toggleSideReference(defaultStep = 1) {
             const drawer = document.getElementById('sideRefDrawer');
             if (drawer.classList.contains('open')) {
-                drawer.classList.remove('open');
+                closeSideReference();
             } else {
                 openSideReferenceStep(defaultStep);
             }
         }
 
         function closeSideReference() {
-            document.getElementById('sideRefDrawer').classList.remove('open');
+            const drawer = document.getElementById('sideRefDrawer');
+            if (drawer) drawer.classList.remove('open');
         }
 
         function setWorksheetTopic(topicStr) {
@@ -2388,20 +3031,31 @@
         }
 
         function syncPrintMirrorText(data) {
+            const coreStr = `1. ${data.core1 || '       '}    2. ${data.core2 || '       '}`;
             document.getElementById('print_ws_name').textContent = data.name || '________________';
             document.getElementById('print_ws_topic').textContent = data.topic || '';
-            document.getElementById('print_ws_cores').textContent = `1. ${data.core1 || '       '}    2. ${data.core2 || '       '}`;
+            document.getElementById('print_ws_cores').textContent = coreStr;
             document.getElementById('print_ws_stage1').textContent = data.stage1 || '';
             document.getElementById('print_ws_stage2').textContent = data.stage2 || '';
             document.getElementById('print_ws_stage3').textContent = data.stage3 || '';
             document.getElementById('print_ws_grade').textContent = data.grade || '';
+
+            document.getElementById('pdf_ws_name').textContent = data.name ? ` ${data.name} ` : '        ';
+            document.getElementById('pdf_ws_topic').textContent = data.topic || '';
+            document.getElementById('pdf_ws_cores').textContent = coreStr;
+            document.getElementById('pdf_ws_stage1').textContent = data.stage1 || '';
+            document.getElementById('pdf_ws_stage2').textContent = data.stage2 || '';
+            document.getElementById('pdf_ws_stage3').textContent = data.stage3 || '';
+            document.getElementById('pdf_ws_grade').textContent = data.grade || '';
         }
 
         function clearWorksheet() {
             if (!confirm('確定要清空目前填寫的所有講稿內容嗎？')) return;
+            stopMandarinSpeech();
             ['ws_name', 'ws_topic', 'ws_core1', 'ws_core2', 'ws_stage1', 'ws_stage2', 'ws_stage3', 'ws_grade'].forEach(id => {
                 document.getElementById(id).value = '';
             });
+            document.getElementById('completedSpeechCard').classList.remove('show');
             saveWorksheetData();
         }
 
@@ -2498,15 +3152,59 @@
             URL.revokeObjectURL(url);
         }
 
-        // 下載 PDF 功能（呼叫瀏覽器 A4 標準表格列印／另存為 PDF）
+        // 下載 PDF 功能
         function downloadPdfDoc() {
             saveWorksheetData();
-            window.print();
+            const name = document.getElementById('ws_name').value.trim() || '學生';
+            const btn = document.getElementById('downloadPdfBtn');
+
+            if (typeof html2pdf !== 'undefined') {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '⏳ 生成中...';
+                btn.disabled = true;
+
+                const target = document.getElementById('pdfExportTarget');
+                const opt = {
+                    margin:       12,
+                    filename:     `發言講稿_${name}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(target).save().then(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }).catch(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    window.print();
+                });
+            } else {
+                window.print();
+            }
         }
 
         // ================= 1分鐘發言計時器 =================
         let timerSeconds = 60;
         let timerInterval = null;
+
+        function playTimerBell() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.18);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch (e) {}
+        }
 
         function updateTimerDisplay() {
             const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
@@ -2522,6 +3220,9 @@
 
         function toggleTimer() {
             const btn = document.getElementById('timerStartBtn');
+            const box = document.getElementById('timerBoxContainer');
+            box.classList.remove('time-up');
+
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
@@ -2536,7 +3237,9 @@
                         clearInterval(timerInterval);
                         timerInterval = null;
                         btn.textContent = '開始';
-                        alert('⏰ 1分鐘發言時間到！做得好！');
+                        box.classList.add('time-up');
+                        playTimerBell();
+                        document.getElementById('timerDisplay').textContent = '時間到!';
                     }
                 }, 1000);
             }
@@ -2548,6 +3251,7 @@
                 timerInterval = null;
             }
             timerSeconds = 60;
+            document.getElementById('timerBoxContainer').classList.remove('time-up');
             updateTimerDisplay();
             document.getElementById('timerStartBtn').textContent = '開始';
         }
