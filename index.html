@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我想，我說，我做主！ - 1分鐘發言練習互動網頁</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #059669;
+            --secondary-dark: #047857;
+            --accent: #f59e0b;
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fef3c7 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "PingFang HK", "Noto Sans TC", sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 頂部計時器與工具列 */
+        .top-utility-bar {
+            width: 100%;
+            max-width: 1100px;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+            cursor: pointer;
+        }
+
+        .timer-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 6px 16px;
+            border-radius: 999px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .timer-display {
+            font-size: 1.35rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            color: #0f172a;
+            min-width: 65px;
+            text-align: center;
+        }
+
+        .timer-display.warning {
+            color: #dc2626;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* 通用按鈕樣式 */
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-secondary:hover:not(:disabled) { background: var(--secondary-dark); }
+        .btn-accent { background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; }
+        .btn-outline { background: white; color: var(--text-main); border: 2px solid #cbd5e1; }
+        .btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .btn-sm { padding: 6px 12px; font-size: 0.9rem; border-radius: 8px; }
+
+        /* 頁面容器 */
+        .view-section {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 32px;
+            position: relative;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 頁面右上角導航列 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px dashed #e2e8f0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .top-right-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        /* ================= 1. 首頁樣式 ================= */
+        .hero-banner {
+            text-align: center;
+            padding: 25px 20px 35px;
+            background: linear-gradient(135deg, #eff6ff 0%, #fef3c7 100%);
+            border-radius: 20px;
+            margin-bottom: 32px;
+            border: 2px solid #bfdbfe;
+        }
+
+        .main-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #1d4ed8, #047857, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .sub-title {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .btn-demo-hero {
+            font-size: 1.35rem;
+            padding: 16px 38px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(234, 88, 12, 0.35);
+            border: 3px solid #fff;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 28px;
+        }
+
+        .topic-entry-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .topic-entry-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--primary);
+            box-shadow: 0 16px 32px rgba(37, 99, 235, 0.15);
+        }
+
+        .topic-img-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+
+        .topic-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .topic-entry-card:hover .topic-img-wrapper img {
+            transform: scale(1.04);
+        }
+
+        .topic-tag {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(15, 23, 42, 0.85);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .topic-card-body {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+
+        .topic-card-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* ================= 2. 說話示範與點擊分析 (A1-A3) ================= */
+        .demo-stage {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%);
+            border-radius: 24px;
+            padding: 32px 38px;
+            border: 3px solid #bfdbfe;
+            box-shadow: inset 0 0 40px rgba(59, 130, 246, 0.06), 0 12px 30px rgba(0,0,0,0.05);
+            position: relative;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .demo-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .demo-label-badge {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 10px 28px;
+            border-radius: 14px;
+            font-size: 1.65rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+            border: 2px solid #93c5fd;
+        }
+
+        .demo-step-header {
+            text-align: center;
+            margin: 6px auto 20px;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            padding: 12px 36px;
+            border-radius: 20px;
+            border: 2px solid #7dd3fc;
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.15);
+            display: inline-block;
+            align-self: center;
+        }
+
+        .demo-step-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #dc2626;
+            text-shadow: 1px 1px 0px #fff;
+            margin-bottom: 2px;
+        }
+
+        .demo-step-subtitle {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1e3a8a;
+        }
+
+        .analysis-instruction-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fef3c7;
+            border: 2px solid #fcd34d;
+            color: #92400e;
+            padding: 10px 18px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .demo-text-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 26px 32px;
+            border-left: 8px solid #2563eb;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+            margin-bottom: 18px;
+            font-size: 1.55rem;
+            line-height: 2.1;
+            font-weight: 700;
+        }
+
+        .demo-text-content p {
+            margin-bottom: 14px;
+            text-indent: 2em;
+        }
+
+        .demo-text-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .demo-color-p1 { color: #9a3412; border-left-color: #ea580c; }
+        .demo-color-p2 { color: #047857; border-left-color: #10b981; }
+        .demo-color-p3 { color: #0369a1; border-left-color: #0284c7; }
+
+        /* 可點擊分析的句子片段樣式 */
+        .clickable-seg {
+            cursor: pointer;
+            padding: 3px 6px;
+            margin: 0 1px;
+            border-radius: 8px;
+            border-bottom: 3px dashed rgba(100, 116, 139, 0.45);
+            transition: all 0.2s ease;
+            position: relative;
+            display: inline;
+        }
+
+        .clickable-seg:hover {
+            background: rgba(254, 240, 138, 0.7);
+            border-bottom-color: #d97706;
+        }
+
+        .clickable-seg.active-seg {
+            background: #fef08a;
+            border-bottom: 3px solid #dc2626;
+            box-shadow: 0 2px 10px rgba(234, 88, 12, 0.2);
+        }
+
+        /* 行內小標籤（當開啟「顯示全部標籤」或點擊時顯示） */
+        .seg-inline-tag {
+            display: none;
+            font-size: 0.82rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-right: 4px;
+            vertical-align: middle;
+            color: white;
+            text-indent: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+        }
+
+        .show-all-tags .seg-inline-tag,
+        .clickable-seg.active-seg .seg-inline-tag {
+            display: inline-block;
+        }
+
+        /* 各類分析標籤顏色 */
+        .tag-stance { background: #dc2626; }       /* 立場 / 重申立場 */
+        .tag-viewpoint { background: #ea580c; }    /* 觀點 */
+        .tag-category { background: #7c3aed; }     /* 分類說明 */
+        .tag-example { background: #0284c7; }      /* 舉例說明 */
+        .tag-expansion { background: #059669; }    /* 拓展(指出優點/效果) */
+        .tag-summary { background: #4f46e5; }      /* 總結歸納 */
+
+        /* 彈出式結構分析面板 */
+        .analysis-popup-box {
+            background: white;
+            border: 3px solid #cbd5e1;
+            border-radius: 18px;
+            padding: 18px 24px;
+            margin-bottom: 22px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-height: 92px;
+        }
+
+        .analysis-popup-box.active-analysis {
+            border-color: #2563eb;
+            background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+            animation: popBounce 0.3s ease;
+        }
+
+        @keyframes popBounce {
+            0% { transform: scale(0.98); }
+            50% { transform: scale(1.01); }
+            100% { transform: scale(1); }
+        }
+
+        .analysis-badge-large {
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 900;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        }
+
+        .analysis-detail-body {
+            flex: 1;
+        }
+
+        .analysis-quote {
+            font-size: 1rem;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .analysis-desc {
+            font-size: 1.15rem;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .demo-bottom-jumps {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .jump-card-btn {
+            background: linear-gradient(135deg, #e0f2fe 0%, #cffafe 100%);
+            border: 2px solid #38bdf8;
+            border-radius: 16px;
+            padding: 12px 28px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            min-width: 210px;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+        }
+
+        .jump-card-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            background: linear-gradient(135deg, #bae6fd 0%, #a5f3fc 100%);
+            box-shadow: 0 8px 18px rgba(14, 165, 233, 0.28);
+        }
+
+        .jump-card-btn .go-text {
+            display: block;
+            color: #dc2626;
+            font-size: 1.25rem;
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+
+        .jump-card-btn .target-text {
+            display: block;
+            color: #0f172a;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        /* ================= 3. 題目一：B1.jpg 看影片表達意見 ================= */
+        .b1-interactive-container {
+            position: relative;
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto 24px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            border: 3px solid #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .b1-interactive-container img.main-b1-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .country-hotspot {
+            position: absolute;
+            top: 30%;
+            height: 63%;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 16px;
+            border: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .country-hotspot:hover {
+            background: rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.45);
+            transform: translateY(-3px);
+        }
+
+        .hotspot-japan { left: 3.5%; width: 30%; }
+        .hotspot-france { left: 35%; width: 30%; }
+        .hotspot-brazil { left: 66.5%; width: 30.5%; }
+
+        .watch-video-pill {
+            background: rgba(220, 38, 38, 0.92);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            border: 2px solid white;
+            animation: bounceSlow 2s infinite;
+        }
+
+        @keyframes bounceSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .country-quick-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        /* 影片播放頁 */
+        .video-stage {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .video-country-title {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+            margin-bottom: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: #eff6ff;
+            padding: 8px 32px;
+            border-radius: 999px;
+            border: 2px solid #bfdbfe;
+        }
+
+        .video-frame-box {
+            width: 100%;
+            background: #0f172a;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-frame-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* ================= 4. 題目二：看圖片表達意見（寵物） ================= */
+        .d-slide-container {
+            max-width: 960px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .d-page-indicator {
+            display: inline-block;
+            background: #ecfdf5;
+            color: #047857;
+            border: 2px solid #6ee7b7;
+            padding: 6px 22px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            margin-bottom: 14px;
+        }
+
+        .d-image-frame {
+            position: relative;
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            border: 3px solid #cbd5e1;
+            background: #ffffff;
+            min-height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .d-image-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 寵物題目頁上的狗、鸚鵡、鬆獅蜥蜴互動點擊熱區 */
+        .d1-hotspots-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .pet-hotspot {
+            position: absolute;
+            border-radius: 16px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 14px;
+            border: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .pet-hotspot:hover {
+            background: rgba(5, 150, 105, 0.16);
+            border-color: #059669;
+            box-shadow: 0 0 25px rgba(5, 150, 105, 0.45);
+            transform: translateY(-3px);
+        }
+
+        .hotspot-dog { left: 9.5%; top: 43%; width: 26%; height: 50%; }
+        .hotspot-parrot { left: 40.5%; top: 45%; width: 25.5%; height: 48%; }
+        .hotspot-lizard { left: 68.5%; top: 41%; width: 26%; height: 50%; }
+
+        .pet-click-pill {
+            background: rgba(5, 150, 105, 0.94);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            border: 2px solid white;
+            animation: bounceSlow 2s infinite;
+        }
+
+        .pet-quick-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .d-dots-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .d-dot-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 2px solid #cbd5e1;
+            background: white;
+            font-weight: 800;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .d-dot-btn:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .d-dot-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .img-fallback-box {
+            padding: 40px 24px;
+            text-align: center;
+            color: #475569;
+        }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 2.1rem; }
+            .topics-grid { grid-template-columns: 1fr; }
+            .demo-stage { padding: 24px 20px; }
+            .demo-text-content { font-size: 1.25rem; padding: 20px; }
+            .analysis-popup-box { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .watch-video-pill, .pet-click-pill { font-size: 0.78rem; padding: 5px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頂部工具與1分鐘計時器列 -->
+    <header class="top-utility-bar">
+        <div class="brand-badge" onclick="navigateTo('home')">
+            <span>🎤</span>
+            <span>我想，我說，我做主！</span>
+        </div>
+
+        <div class="timer-box">
+            <span>⏱️ 1分鐘發言計時：</span>
+            <span id="timerDisplay" class="timer-display">01:00</span>
+            <button class="btn btn-primary btn-sm" id="timerStartBtn" onclick="toggleTimer()">開始</button>
+            <button class="btn btn-outline btn-sm" onclick="resetTimer()">重設</button>
+        </div>
+    </header>
+
+    <!-- ==================== 1. 首頁 (Home) ==================== -->
+    <main id="view-home" class="view-section active">
+        <div class="hero-banner">
+            <h1 class="main-title">我想，我說，我做主！</h1>
+            <p class="sub-title">一分鐘個人看法與立場表達互動練習空間</p>
+            <button class="btn btn-demo-hero" onclick="openDemo(1)">
+                💡 表達意見示範
+            </button>
+        </div>
+
+        <div class="topics-grid">
+            <!-- 題目一入口 -->
+            <div class="topic-entry-card" onclick="navigateTo('topic-b')">
+                <div class="topic-img-wrapper">
+                    <span class="topic-tag">🎬 題目一：看影片表達意見</span>
+                    <img src="B1.jpg" alt="你會選擇以下哪個國家旅行？" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'img-fallback-box\'><h3>🎬 題目一</h3><p>你會選擇以下哪個國家旅行？<br>（日本 / 法國 / 巴西）</p></div>';">
+                </div>
+                <div class="topic-card-body">
+                    <div>
+                        <div class="topic-card-title">你會選擇以下哪個國家旅行？</div>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">點擊觀看日本、法國、巴西影片並練習發言</p>
+                    </div>
+                    <span class="btn btn-primary">進入題目 ➔</span>
+                </div>
+            </div>
+
+            <!-- 題目二入口 -->
+            <div class="topic-entry-card" onclick="openTopicD(1)">
+                <div class="topic-img-wrapper">
+                    <span class="topic-tag" style="background: rgba(5, 150, 105, 0.9);">🐾 題目二：看圖片表達意見</span>
+                    <img src="D1.jpg" alt="你會飼養以下哪種寵物？" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'img-fallback-box\'><h3>🐾 題目二</h3><p>你會飼養以下哪種寵物？<br>（狗 / 鸚鵡 / 鬆獅蜥蜴）</p></div>';">
+                </div>
+                <div class="topic-card-body">
+                    <div>
+                        <div class="topic-card-title">你會飼養以下哪種寵物？</div>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">點擊狗、鸚鵡、鬆獅蜥蜴查看寵物介紹並練習發言</p>
+                    </div>
+                    <span class="btn btn-secondary">進入題目 ➔</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== 2. 表達意見示範頁 (A1 - A3 含點擊內容分析) ==================== -->
+    <section id="view-demo" class="view-section">
+        <div class="page-header">
+            <h2 style="font-size: 1.5rem; color: var(--primary-dark);">💡 表達意見示範（三段式結構與內容分析）</h2>
+            <!-- 右上角導航按鈕：回首頁、上頁、下頁 -->
+            <div class="top-right-nav">
+                <button class="btn btn-outline" id="returnFromDemoBtn" onclick="returnFromDemo()" style="display: none;">↩️ 返回剛才題目</button>
+                <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
+                <button class="btn btn-primary" id="demoPrevBtn" onclick="changeDemoPage(-1)">⬅️ 上頁</button>
+                <button class="btn btn-primary" id="demoNextBtn" onclick="changeDemoPage(1)">下頁 ➡️</button>
+            </div>
+        </div>
+
+        <div class="demo-stage">
+            <div>
+                <div class="demo-top-row">
+                    <div class="demo-label-badge">說話示範</div>
+                    <div style="font-weight: 800; color: var(--text-muted); font-size: 1.1rem;" id="demoPageCounter">第 1 / 3 頁</div>
+                </div>
+
+                <div style="text-align: center;">
+                    <div class="demo-step-header">
+                        <div class="demo-step-title" id="demoStepTitle">第一段式</div>
+                        <div class="demo-step-subtitle" id="demoStepSubtitle">1個立場、2個原因</div>
+                    </div>
+                </div>
+
+                <!-- 互動提示與一鍵顯示標籤開關 -->
+                <div class="analysis-instruction-bar">
+                    <span>👆 <strong>互動內容分析：</strong>請直接點擊下方不同句子或詞語，查看屬於哪一部分結構！</span>
+                    <button class="btn btn-outline btn-sm" id="toggleAllTagsBtn" onclick="toggleAllInlineTags()">🏷️ 顯示全部結構標籤</button>
+                </div>
+
+                <!-- 示範文字區（支援點擊句子片段） -->
+                <div class="demo-text-content demo-color-p1" id="demoTextContent"></div>
+
+                <!-- 點擊後彈出/顯示的結構分析卡片 -->
+                <div class="analysis-popup-box" id="analysisPopupBox">
+                    <span class="analysis-badge-large" id="analysisBadge" style="background: #64748b;">🔍 內容分析</span>
+                    <div class="analysis-detail-body">
+                        <div class="analysis-quote" id="analysisQuote">請點擊上方示範文字中的任何句子或「……方面」字眼</div>
+                        <div class="analysis-desc" id="analysisDesc">系統會在此處即時顯示該句屬於「立場」、「觀點」、「分類說明」、「舉例說明」或「拓展(指出優點/效果)」。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-bottom-jumps" id="demoBottomJumps"></div>
+        </div>
+    </section>
+
+    <!-- ==================== 3. 題目一：B1.jpg 看影片表達意見 ==================== -->
+    <section id="view-topic-b" class="view-section">
+        <div class="page-header">
+            <h2 style="font-size: 1.5rem; color: var(--primary-dark);">🎬 看影片表達意見：你會選擇以下哪個國家旅行？</h2>
+            <div class="top-right-nav">
+                <button class="btn btn-accent" onclick="openDemo(1, 'topic-b')">💡 看示範</button>
+                <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: var(--text-muted); font-weight: 700; margin-bottom: 14px; font-size: 1.1rem;">
+            👇 請直接點擊下方圖片中的「日本」、「法國」或「巴西」觀看介紹影片：
+        </p>
+
+        <div class="b1-interactive-container">
+            <img src="B1.jpg" alt="你會選擇以下哪個國家旅行？" class="main-b1-img">
+
+            <!-- 日本點擊區 -->
+            <div class="country-hotspot hotspot-japan" onclick="openVideo('日本', 'V1.mp4')" title="點擊觀看日本影片">
+                <span class="watch-video-pill">▶️ 點擊看影片：日本</span>
+            </div>
+
+            <!-- 法國點擊區 -->
+            <div class="country-hotspot hotspot-france" onclick="openVideo('法國', 'V2.mp4')" title="點擊觀看法國影片">
+                <span class="watch-video-pill">▶️ 點擊看影片：法國</span>
+            </div>
+
+            <!-- 巴西點擊區 -->
+            <div class="country-hotspot hotspot-brazil" onclick="openVideo('巴西', 'V3.mp4')" title="點擊觀看巴西影片">
+                <span class="watch-video-pill">▶️ 點擊看影片：巴西</span>
+            </div>
+        </div>
+
+        <div class="country-quick-buttons">
+            <button class="btn btn-primary" onclick="openVideo('日本', 'V1.mp4')">🇯🇵 1. 日本</button>
+            <button class="btn btn-primary" onclick="openVideo('法國', 'V2.mp4')">🇫🇷 2. 法國</button>
+            <button class="btn btn-primary" onclick="openVideo('巴西', 'V3.mp4')">🇧🇷 3. 巴西</button>
+        </div>
+    </section>
+
+    <!-- ==================== 3-1. 國家影片播放頁 ==================== -->
+    <section id="view-video-player" class="view-section">
+        <div class="page-header">
+            <h2 style="font-size: 1.5rem; color: var(--primary-dark);">🎬 觀看國家介紹影片</h2>
+            <div class="top-right-nav">
+                <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目</button>
+                <button class="btn btn-accent" onclick="openDemo(1, 'video-player')">💡 看示範</button>
+                <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
+            </div>
+        </div>
+
+        <div class="video-stage">
+            <div class="video-country-title" id="videoCountryHeading">日本</div>
+
+            <div class="video-frame-box">
+                <video id="countryVideoElement" controls playsinline>
+                    <source id="countryVideoSource" src="V1.mp4" type="video/mp4">
+                    您的瀏覽器不支援 HTML5 影片播放。
+                </video>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
+                <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目（重新選擇其他國家）</button>
+                <button class="btn btn-accent" onclick="openDemo(1, 'video-player')">💡 看示範</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 4. 題目二：寵物題目（不顯示 D1-D7 及 .jpg 字樣） ==================== -->
+    <section id="view-topic-d" class="view-section">
+        <div class="page-header">
+            <h2 style="font-size: 1.5rem; color: var(--secondary);">🐾 看圖片表達意見：你會飼養以下哪種寵物？</h2>
+            <!-- 每頁設「上頁」、「下頁」、以及「看示範」按鍵 -->
+            <div class="top-right-nav">
+                <button class="btn btn-outline" id="backToD1Btn" onclick="renderDPage(1)" style="display: none;">🐾 返回寵物題目頁</button>
+                <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
+                <button class="btn btn-secondary" id="dPrevBtn" onclick="changeDPage(-1)">⬅️ 上頁</button>
+                <button class="btn btn-secondary" id="dNextBtn" onclick="changeDPage(1)">下頁 ➡️</button>
+                <button class="btn btn-accent" onclick="openDemo(1, 'topic-d')">💡 看示範</button>
+            </div>
+        </div>
+
+        <div class="d-slide-container">
+            <div class="d-page-indicator" id="dPageIndicator">寵物題目頁：你會飼養以下哪種寵物？</div>
+
+            <p id="d1ClickHint" style="color: var(--text-muted); font-weight: 700; margin-bottom: 12px; font-size: 1.1rem;">
+                👇 請直接點擊下方圖片中的「狗」、「鸚鵡」或「鬆獅蜥蜴」查看詳細資料：
+            </p>
+
+            <div class="d-image-frame">
+                <img id="dSlideImage" src="D1.jpg" alt="寵物資料圖片">
+
+                <!-- 僅在寵物題目頁顯示的「狗」、「鸚鵡」、「鬆獅蜥蜴」圖片點擊按鍵層 -->
+                <div id="d1HotspotsLayer" class="d1-hotspots-layer">
+                    <!-- 點擊狗 -->
+                    <div class="pet-hotspot hotspot-dog" onclick="renderDPage(2)" title="點擊查看「狗」資料">
+                        <span class="pet-click-pill">🐶 點擊看：狗</span>
+                    </div>
+
+                    <!-- 點擊鸚鵡 -->
+                    <div class="pet-hotspot hotspot-parrot" onclick="renderDPage(4)" title="點擊查看「鸚鵡」資料">
+                        <span class="pet-click-pill">🦜 點擊看：鸚鵡</span>
+                    </div>
+
+                    <!-- 點擊鬆獅蜥蜴 -->
+                    <div class="pet-hotspot hotspot-lizard" onclick="renderDPage(6)" title="點擊查看「鬆獅蜥蜴」資料">
+                        <span class="pet-click-pill">🦎 點擊看：鬆獅蜥蜴</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 動物分類快捷按鍵（無 D1-D7 或 .jpg 字樣） -->
+            <div class="pet-quick-buttons">
+                <button class="btn btn-outline" id="btnPetHome" onclick="renderDPage(1)">📋 寵物題目頁</button>
+                <button class="btn btn-secondary" onclick="renderDPage(2)">🐶 狗</button>
+                <button class="btn btn-secondary" onclick="renderDPage(4)">🦜 鸚鵡</button>
+                <button class="btn btn-secondary" onclick="renderDPage(6)">🦎 鬆獅蜥蜴</button>
+            </div>
+
+            <!-- 下方條列選擇（顯示為：狗、鸚鵡、鬆獅蜥蜴） -->
+            <div class="d-dots-bar" id="dDotsBar"></div>
+        </div>
+    </section>
+
+    <script>
+        // ================= 狀態管理 =================
+        let currentDemoPage = 1;
+        let lastOriginView = null;
+        let currentDPage = 1;
+        const totalDPages = 7;
+        let showAllTags = false;
+
+        // A1-A3 說話示範與點擊分析資料（文字內容嚴格保持不變）
+        const demoPagesData = {
+            1: {
+                stepTitle: "第一段式",
+                stepSubtitle: "1個立場、2個原因",
+                colorClass: "demo-color-p1",
+                paragraphs: [
+                    [
+                        {
+                            text: "對於千呎大屋的選址，我的看法是購買荃灣的「海之戀」。",
+                            type: "立場",
+                            tagClass: "tag-stance",
+                            desc: "【立場】開門見山，清楚表明自己對題目的最終決定與選擇（購買荃灣的「海之戀」）。"
+                        }
+                    ],
+                    [
+                        {
+                            text: "因為這裡三面環海，風景優美；",
+                            type: "觀點（原因一）",
+                            tagClass: "tag-viewpoint",
+                            desc: "【觀點（原因一）】用「因為」引出支持自己立場的第一個主要原因（環境景觀角度）。"
+                        },
+                        {
+                            text: "而且比鄰大型商場和交通樞紐，生活便利。",
+                            type: "觀點（原因二）",
+                            tagClass: "tag-viewpoint",
+                            desc: "【觀點（原因二）】用「而且」進一層提出第二個主要原因（生活配套與交通角度）。"
+                        }
+                    ]
+                ],
+                jumps: [
+                    { targetPage: 2, label: "3/4句解釋" },
+                    { targetPage: 3, label: "總結" }
+                ]
+            },
+            2: {
+                stepTitle: "第二段式",
+                stepSubtitle: "3/4句解釋",
+                colorClass: "demo-color-p2",
+                paragraphs: [
+                    [
+                        {
+                            text: "首先，在交通方面，",
+                            type: "分類說明",
+                            tagClass: "tag-category",
+                            desc: "【分類說明】運用序數詞「首先」及主題詞「在交通方面」，清楚標示第一個解說層次。"
+                        },
+                        {
+                            text: "「海之戀」位處交通樞紐，連接巴士總站、西鐵站和郵輪碼頭，",
+                            type: "舉例說明",
+                            tagClass: "tag-example",
+                            desc: "【舉例說明】具體列出巴士總站、西鐵站、郵輪碼頭等實際交通設施作為例證。"
+                        },
+                        {
+                            text: "方便平時上班上學。",
+                            type: "拓展(指出優點/效果)",
+                            tagClass: "tag-expansion",
+                            desc: "【拓展(指出優點/效果)】進一步指出交通配套帶來的實際好處與生活效果。"
+                        }
+                    ],
+                    [
+                        {
+                            text: "其次，在生活方面，",
+                            type: "分類說明",
+                            tagClass: "tag-category",
+                            desc: "【分類說明】運用「其次」及主題詞「在生活方面」，清楚切換至第二個解說層次。"
+                        },
+                        {
+                            text: "「海之戀」比鄰多個大型商場，包括坐擁兩家電影院的荃灣廣場和荃新天地，",
+                            type: "舉例說明",
+                            tagClass: "tag-example",
+                            desc: "【舉例說明】舉出「荃灣廣場」和「荃新天地」及兩家電影院等具體例子加以說明。"
+                        },
+                        {
+                            text: "集娛樂悠閒於一身。",
+                            type: "拓展(指出優點/效果)",
+                            tagClass: "tag-expansion",
+                            desc: "【拓展(指出優點/效果)】總結大型商場配套為住戶帶來的生活優點與享受。"
+                        }
+                    ],
+                    [
+                        {
+                            text: "再者，在景色方面，",
+                            type: "分類說明",
+                            tagClass: "tag-category",
+                            desc: "【分類說明】運用「再者」及主題詞「在景色方面」，引出第三個解說層次。"
+                        },
+                        {
+                            text: "它面向荃灣西海域，",
+                            type: "舉例說明",
+                            tagClass: "tag-example",
+                            desc: "【舉例說明】具體說明屋苑面向「荃灣西海域」的實際地理景觀位置。"
+                        },
+                        {
+                            text: "足不出戶，便可每天眺望夕陽西下的美景。",
+                            type: "拓展(指出優點/效果)",
+                            tagClass: "tag-expansion",
+                            desc: "【拓展(指出優點/效果)】指出海景位置的優點，描繪在家即可賞景的理想效果。"
+                        }
+                    ],
+                    [
+                        {
+                            text: "最後，",
+                            type: "分類說明",
+                            tagClass: "tag-category",
+                            desc: "【分類說明】運用「最後」標示補充說明的第四個層次。"
+                        },
+                        {
+                            text: "「海之戀」第二期已定名為「愛炫美」，",
+                            type: "舉例說明",
+                            tagClass: "tag-example",
+                            desc: "【舉例說明】舉出屋苑第二期名稱「愛炫美」作為具體事例。"
+                        },
+                        {
+                            text: "非常符合我的生活態度。",
+                            type: "拓展(指出優點/效果)",
+                            tagClass: "tag-expansion",
+                            desc: "【拓展(指出優點/效果)】將事例連結個人價值觀，指出契合個人生活態度的正面效果。"
+                        }
+                    ]
+                ],
+                jumps: [
+                    { targetPage: 1, label: "1個立場、2個原因" },
+                    { targetPage: 3, label: "總結" }
+                ]
+            },
+            3: {
+                stepTitle: "第三段式",
+                stepSubtitle: "總結",
+                colorClass: "demo-color-p3",
+                paragraphs: [
+                    [
+                        {
+                            text: "總括而言，「海之戀」無論在生活、交通還是景色方面，",
+                            type: "分類說明（總結歸納）",
+                            tagClass: "tag-summary",
+                            desc: "【分類說明（總結歸納）】以「總括而言」收束全篇，並再次統整「生活、交通、景色」三大分類。"
+                        },
+                        {
+                            text: "都能滿足我對千呎大屋的要求，",
+                            type: "拓展(指出優點/效果)",
+                            tagClass: "tag-expansion",
+                            desc: "【拓展(指出優點/效果)】綜合指出該選址能全面滿足自身要求的整體優點與效果。"
+                        },
+                        {
+                            text: "所以我的選擇是購買「海之戀」。",
+                            type: "立場（重申立場）",
+                            tagClass: "tag-stance",
+                            desc: "【立場（首尾呼應）】以「所以」作結，再次堅定重申個人立場，與第一段首尾呼應。"
+                        }
+                    ]
+                ],
+                jumps: [
+                    { targetPage: 1, label: "1個立場、2個原因" },
+                    { targetPage: 2, label: "3/4句解釋" }
+                ]
+            }
+        };
+
+        // 寵物頁面標題與底部條列按鈕名稱（完全不出現 D1-D7 及 .jpg 字樣）
+        const dPageMeta = {
+            1: { navLabel: "寵物題目頁", title: "寵物題目頁：你會飼養以下哪種寵物？（點擊狗 / 鸚鵡 / 鬆獅蜥蜴）" },
+            2: { navLabel: "狗 (一)", title: "🐶 狗：特點與飼養環境" },
+            3: { navLabel: "狗 (二)", title: "🐶 狗：食物與互動性" },
+            4: { navLabel: "鸚鵡 (一)", title: "🦜 鸚鵡：特點與飼養環境" },
+            5: { navLabel: "鸚鵡 (二)", title: "🦜 鸚鵡：食物與互動性" },
+            6: { navLabel: "鬆獅蜥蜴 (一)", title: "🦎 鬆獅蜥蜴：特點與飼養環境" },
+            7: { navLabel: "鬆獅蜥蜴 (二)", title: "🦎 鬆獅蜥蜴：食物與互動性" }
+        };
+
+        // ================= 頁面切換功能 =================
+        function stopActiveVideo() {
+            const vid = document.getElementById('countryVideoElement');
+            if (vid) {
+                vid.pause();
+            }
+        }
+
+        function navigateTo(viewId) {
+            stopActiveVideo();
+            document.querySelectorAll('.view-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            const target = document.getElementById('view-' + viewId);
+            if (target) {
+                target.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ================= 表達意見示範與點擊分析 (A1-A3) =================
+        function openDemo(page = 1, fromView = null) {
+            lastOriginView = fromView;
+            const returnBtn = document.getElementById('returnFromDemoBtn');
+            if (fromView) {
+                returnBtn.style.display = 'inline-flex';
+            } else {
+                returnBtn.style.display = 'none';
+            }
+            renderDemoPage(page);
+            navigateTo('demo');
+        }
+
+        function returnFromDemo() {
+            if (lastOriginView) {
+                navigateTo(lastOriginView);
+            } else {
+                navigateTo('home');
+            }
+        }
+
+        function changeDemoPage(delta) {
+            const next = currentDemoPage + delta;
+            if (next >= 1 && next <= 3) {
+                renderDemoPage(next);
+            }
+        }
+
+        function toggleAllInlineTags() {
+            showAllTags = !showAllTags;
+            const contentBox = document.getElementById('demoTextContent');
+            const btn = document.getElementById('toggleAllTagsBtn');
+            if (showAllTags) {
+                contentBox.classList.add('show-all-tags');
+                btn.textContent = '🏷️ 隱藏全部結構標籤';
+            } else {
+                contentBox.classList.remove('show-all-tags');
+                btn.textContent = '🏷️ 顯示全部結構標籤';
+            }
+        }
+
+        function renderDemoPage(pageNum) {
+            currentDemoPage = pageNum;
+            const data = demoPagesData[pageNum];
+
+            document.getElementById('demoPageCounter').textContent = `第 ${pageNum} / 3 頁`;
+            document.getElementById('demoStepTitle').textContent = data.stepTitle;
+            document.getElementById('demoStepSubtitle').textContent = data.stepSubtitle;
+
+            const contentBox = document.getElementById('demoTextContent');
+            contentBox.className = 'demo-text-content ' + data.colorClass + (showAllTags ? ' show-all-tags' : '');
+
+            let htmlParagraphs = '';
+            data.paragraphs.forEach((pSegments, pIdx) => {
+                let segHtml = '';
+                pSegments.forEach((seg, sIdx) => {
+                    const segId = `seg-${pageNum}-${pIdx}-${sIdx}`;
+                    segHtml += `<span class="clickable-seg" id="${segId}" onclick="showSegmentAnalysis(${pageNum}, ${pIdx}, ${sIdx}, '${segId}')"><span class="seg-inline-tag ${seg.tagClass}">${seg.type}</span>${seg.text}</span>`;
+                });
+                htmlParagraphs += `<p>${segHtml}</p>`;
+            });
+            contentBox.innerHTML = htmlParagraphs;
+
+            // 重設下方分析面板為預設提示
+            const popupBox = document.getElementById('analysisPopupBox');
+            popupBox.classList.remove('active-analysis');
+            const badge = document.getElementById('analysisBadge');
+            badge.className = 'analysis-badge-large';
+            badge.style.background = '#64748b';
+            badge.textContent = '🔍 點擊句子查看分析';
+            document.getElementById('analysisQuote').textContent = '請點擊上方示範段落中的任何句子或「……方面」字眼';
+            document.getElementById('analysisDesc').textContent = '系統會即時顯示該部分屬於「立場」、「觀點」、「分類說明」、「舉例說明」或「拓展(指出優點/效果)」。';
+
+            const jumpsBox = document.getElementById('demoBottomJumps');
+            jumpsBox.innerHTML = data.jumps.map(j => `
+                <button class="jump-card-btn" onclick="renderDemoPage(${j.targetPage})">
+                    <span class="go-text">前往</span>
+                    <span class="target-text">${j.label}</span>
+                </button>
+            `).join('');
+
+            document.getElementById('demoPrevBtn').disabled = (pageNum === 1);
+            document.getElementById('demoNextBtn').disabled = (pageNum === 3);
+        }
+
+        function showSegmentAnalysis(pageNum, pIdx, sIdx, elementId) {
+            const seg = demoPagesData[pageNum].paragraphs[pIdx][sIdx];
+
+            document.querySelectorAll('.clickable-seg').forEach(el => {
+                el.classList.remove('active-seg');
+            });
+            const clickedEl = document.getElementById(elementId);
+            if (clickedEl) {
+                clickedEl.classList.add('active-seg');
+            }
+
+            const popupBox = document.getElementById('analysisPopupBox');
+            popupBox.classList.remove('active-analysis');
+            void popupBox.offsetWidth; // 觸發動畫重播
+            popupBox.classList.add('active-analysis');
+
+            const badge = document.getElementById('analysisBadge');
+            badge.style.background = '';
+            badge.className = 'analysis-badge-large ' + seg.tagClass;
+            badge.textContent = seg.type;
+
+            document.getElementById('analysisQuote').textContent = `句子內容：「${seg.text}」`;
+            document.getElementById('analysisDesc').textContent = seg.desc;
+        }
+
+        // ================= 題目一：B1.jpg 與影片播放 =================
+        function openVideo(countryName, videoFile) {
+            document.getElementById('videoCountryHeading').textContent = countryName;
+            const videoEl = document.getElementById('countryVideoElement');
+            const sourceEl = document.getElementById('countryVideoSource');
+            sourceEl.src = videoFile;
+            videoEl.load();
+            navigateTo('video-player');
+            videoEl.play().catch(() => {});
+        }
+
+        // ================= 題目二：寵物圖片瀏覽（不顯示 D1-D7 及 .jpg 字樣） =================
+        function openTopicD(page = 1) {
+            renderDPage(page);
+            navigateTo('topic-d');
+        }
+
+        function changeDPage(delta) {
+            const next = currentDPage + delta;
+            if (next >= 1 && next <= totalDPages) {
+                renderDPage(next);
+            }
+        }
+
+        function renderDPage(pageNum) {
+            currentDPage = pageNum;
+            const imgFile = `D${pageNum}.jpg`;
+            const imgEl = document.getElementById('dSlideImage');
+            imgEl.src = imgFile;
+            imgEl.alt = dPageMeta[pageNum].title;
+
+            // 頂部標題列只顯示寵物名稱與說明，不顯示 D1-D7 及 .jpg
+            document.getElementById('dPageIndicator').textContent = dPageMeta[pageNum].title;
+
+            // 控制題目頁上的三個動物圖片點擊熱區與返回按鈕顯示
+            const hotspotsLayer = document.getElementById('d1HotspotsLayer');
+            const clickHint = document.getElementById('d1ClickHint');
+            const backToD1Btn = document.getElementById('backToD1Btn');
+
+            if (pageNum === 1) {
+                hotspotsLayer.style.display = 'block';
+                clickHint.style.display = 'block';
+                backToD1Btn.style.display = 'none';
+            } else {
+                hotspotsLayer.style.display = 'none';
+                clickHint.style.display = 'none';
+                backToD1Btn.style.display = 'inline-flex';
+            }
+
+            document.getElementById('dPrevBtn').disabled = (pageNum === 1);
+            document.getElementById('dNextBtn').disabled = (pageNum === totalDPages);
+
+            // 下方條列選擇：D2、D3 顯示為「狗」，D4、D5 顯示為「鸚鵡」，D6、D7 顯示為「鬆獅蜥蜴」
+            const dotsBar = document.getElementById('dDotsBar');
+            let dotsHtml = '';
+            for (let i = 1; i <= totalDPages; i++) {
+                const activeClass = (i === pageNum) ? 'active' : '';
+                dotsHtml += `<button class="d-dot-btn ${activeClass}" onclick="renderDPage(${i})">${dPageMeta[i].navLabel}</button>`;
+            }
+            dotsBar.innerHTML = dotsHtml;
+        }
+
+        // ================= 1分鐘發言計時器 =================
+        let timerSeconds = 60;
+        let timerInterval = null;
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const secs = String(timerSeconds % 60).padStart(2, '0');
+            const display = document.getElementById('timerDisplay');
+            display.textContent = `${mins}:${secs}`;
+            if (timerSeconds <= 10 && timerSeconds > 0) {
+                display.classList.add('warning');
+            } else {
+                display.classList.remove('warning');
+            }
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timerStartBtn');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.textContent = '繼續';
+            } else {
+                if (timerSeconds <= 0) timerSeconds = 60;
+                btn.textContent = '暫停';
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        btn.textContent = '開始';
+                        alert('⏰ 1分鐘發言時間到！做得好！');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timerSeconds = 60;
+            updateTimerDisplay();
+            document.getElementById('timerStartBtn').textContent = '開始';
+        }
+
+        // 初始化
+        renderDemoPage(1);
+        renderDPage(1);
+    </script>
+</body>
+</html>
