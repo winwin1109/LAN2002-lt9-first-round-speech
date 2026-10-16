@@ -11,8 +11,10 @@
             --secondary: #059669;
             --secondary-dark: #047857;
             --accent: #f59e0b;
+            --purple: #7c3aed;
+            --purple-dark: #6d28d9;
             --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fef3c7 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-bg: rgba(255, 255, 255, 0.96);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
@@ -33,12 +35,13 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            padding-bottom: 70px;
         }
 
         /* 頂部計時器與工具列 */
         .top-utility-bar {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1120px;
             background: white;
             padding: 12px 24px;
             border-radius: 16px;
@@ -59,6 +62,13 @@
             font-size: 1.2rem;
             color: var(--primary-dark);
             cursor: pointer;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .timer-box {
@@ -126,6 +136,8 @@
         .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
         .btn-secondary { background: var(--secondary); color: white; }
         .btn-secondary:hover:not(:disabled) { background: var(--secondary-dark); }
+        .btn-purple { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; }
+        .btn-purple:hover:not(:disabled) { background: linear-gradient(135deg, #6d28d9, #4338ca); }
         .btn-accent { background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; }
         .btn-outline { background: white; color: var(--text-main); border: 2px solid #cbd5e1; }
         .btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
@@ -135,7 +147,7 @@
         .view-section {
             display: none;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1120px;
             background: var(--card-bg);
             border-radius: 24px;
             box-shadow: var(--shadow);
@@ -199,13 +211,30 @@
             font-weight: 600;
         }
 
+        .hero-action-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
         .btn-demo-hero {
-            font-size: 1.35rem;
-            padding: 16px 38px;
+            font-size: 1.3rem;
+            padding: 15px 34px;
             border-radius: 999px;
             background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
             color: white;
             box-shadow: 0 10px 25px rgba(234, 88, 12, 0.35);
+            border: 3px solid #fff;
+        }
+
+        .btn-create-hero {
+            font-size: 1.3rem;
+            padding: 15px 34px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.35);
             border: 3px solid #fff;
         }
 
@@ -405,7 +434,6 @@
             box-shadow: 0 2px 10px rgba(234, 88, 12, 0.2);
         }
 
-        /* 行內小標籤（當開啟「顯示全部標籤」或點擊時顯示） */
         .seg-inline-tag {
             display: none;
             font-size: 0.82rem;
@@ -424,15 +452,13 @@
             display: inline-block;
         }
 
-        /* 各類分析標籤顏色 */
-        .tag-stance { background: #dc2626; }       /* 立場 / 重申立場 */
-        .tag-viewpoint { background: #ea580c; }    /* 觀點 */
-        .tag-category { background: #7c3aed; }     /* 分類說明 */
-        .tag-example { background: #0284c7; }      /* 舉例說明 */
-        .tag-expansion { background: #059669; }    /* 拓展(指出優點/效果) */
-        .tag-summary { background: #4f46e5; }      /* 總結歸納 */
+        .tag-stance { background: #dc2626; }
+        .tag-viewpoint { background: #ea580c; }
+        .tag-category { background: #7c3aed; }
+        .tag-example { background: #0284c7; }
+        .tag-expansion { background: #059669; }
+        .tag-summary { background: #4f46e5; }
 
-        /* 彈出式結構分析面板 */
         .analysis-popup-box {
             background: white;
             border: 3px solid #cbd5e1;
@@ -600,7 +626,6 @@
             margin-top: 15px;
         }
 
-        /* 影片播放頁 */
         .video-stage {
             text-align: center;
             max-width: 900px;
@@ -647,6 +672,15 @@
             text-align: center;
         }
 
+        .d-top-status-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
         .d-page-indicator {
             display: inline-block;
             background: #ecfdf5;
@@ -656,7 +690,6 @@
             border-radius: 999px;
             font-weight: 800;
             font-size: 1.15rem;
-            margin-bottom: 14px;
         }
 
         .d-image-frame {
@@ -729,6 +762,33 @@
             animation: bounceSlow 2s infinite;
         }
 
+        /* D2, D4, D6 圖片上的「深入了解」浮動按鍵（覆蓋原圖「相關鏈接 / 詳細介紹」位置） */
+        .deep-dive-overlay-btn {
+            position: absolute;
+            left: 2.5%;
+            top: 41%;
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 15;
+            animation: bounceSlow 1.8s infinite;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .deep-dive-overlay-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.65);
+        }
+
         .pet-quick-buttons {
             display: flex;
             justify-content: center;
@@ -768,10 +828,452 @@
             border-color: var(--secondary);
         }
 
-        .img-fallback-box {
-            padding: 40px 24px;
+        /* ================= 5. 三種動物「深入了解」趣味百科專頁 ================= */
+        .pet-detail-hero {
+            border-radius: 22px;
+            padding: 28px 32px;
+            color: white;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .pet-hero-dog { background: linear-gradient(135deg, #d97706 0%, #ea580c 100%); }
+        .pet-hero-parrot { background: linear-gradient(135deg, #059669 0%, #0284c7 100%); }
+        .pet-hero-lizard { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+
+        .pet-hero-title {
+            font-size: 2.3rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pet-hero-subtitle {
+            font-size: 1.15rem;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .pet-stats-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pet-stat-pill {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 14px;
             text-align: center;
-            color: #475569;
+        }
+
+        .pet-stat-pill .label {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .pet-stat-pill .val {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+        .fun-facts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .fun-fact-card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px 24px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+        }
+
+        .fun-fact-card:hover {
+            transform: translateY(-4px);
+            border-color: #93c5fd;
+        }
+
+        .fun-fact-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fun-fact-card p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .speaking-tips-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 18px;
+            padding: 22px 26px;
+            margin-bottom: 24px;
+        }
+
+        .speaking-tips-box h3 {
+            color: #b45309;
+            font-size: 1.35rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .speaking-tips-list {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .speaking-tips-list li {
+            background: rgba(255,255,255,0.85);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            color: #78350f;
+            border-left: 5px solid #f59e0b;
+            font-size: 1.05rem;
+        }
+
+        /* ================= 6. 我的創作空間（個人講稿創作頁面） ================= */
+        .creation-quick-bar {
+            background: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .creation-quick-bar .hint {
+            font-weight: 800;
+            color: #1e3a8a;
+            font-size: 1rem;
+        }
+
+        .creation-workspace-layout {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .worksheet-container {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            border: 2px solid #cbd5e1;
+        }
+
+        /* 嚴格參照附件「發言講稿.png」的表格結構 */
+        .speech-worksheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #0f172a;
+            background: white;
+        }
+
+        .speech-worksheet-table th,
+        .speech-worksheet-table td {
+            border: 2px solid #0f172a;
+            padding: 14px 16px;
+            vertical-align: top;
+            font-size: 1.08rem;
+        }
+
+        .ws-name-row {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            padding: 16px !important;
+            background: #f8fafc;
+        }
+
+        .ws-inline-input {
+            border: none;
+            border-bottom: 2px solid #0f172a;
+            font-size: 1.35rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            width: 260px;
+            text-align: center;
+            background: transparent;
+            color: #0f172a;
+            outline: none;
+        }
+
+        .ws-inline-input:focus {
+            border-bottom-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .ws-label-col {
+            width: 24%;
+            min-width: 185px;
+            background: #f8fafc;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.6;
+        }
+
+        .ws-section-banner {
+            text-align: center;
+            font-size: 1.45rem;
+            font-weight: 900;
+            background: #f1f5f9;
+            letter-spacing: 4px;
+            padding: 12px !important;
+        }
+
+        .ws-text-input {
+            width: 100%;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #0f172a;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .ws-text-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .ws-textarea {
+            width: 100%;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 1.12rem;
+            line-height: 1.75;
+            font-weight: 600;
+            color: #0f172a;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .ws-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .ws-core-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .ws-core-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+        }
+
+        .ws-ref-btn {
+            margin-top: 12px;
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
+            color: #b45309;
+            font-weight: 800;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .ws-ref-btn:hover {
+            background: #fef3c7;
+            transform: translateY(-2px);
+        }
+
+        /* 創作頁側邊即時範例參考面板 */
+        .side-ref-drawer {
+            width: 360px;
+            background: linear-gradient(145deg, #ffffff 0%, #eff6ff 100%);
+            border: 3px solid #93c5fd;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.15);
+            position: sticky;
+            top: 20px;
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .side-ref-drawer.open {
+            display: block;
+        }
+
+        .side-ref-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #bfdbfe;
+        }
+
+        .side-ref-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .side-ref-tab {
+            flex: 1;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
+            background: white;
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .side-ref-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .side-ref-content-box {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 6px solid var(--primary);
+            font-size: 1.08rem;
+            line-height: 1.75;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 14px;
+        }
+
+        /* 懸浮「返回我的創作空間」按鈕（當學生在創作途中切換去看題目時顯示） */
+        .floating-return-creation {
+            position: fixed;
+            bottom: 22px;
+            right: 24px;
+            z-index: 999;
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 999px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border: 3px solid white;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.45);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: bounceSlow 2s infinite;
+        }
+
+        /* 列印 / 匯出 PDF 專用隱藏區與樣式 */
+        .print-only-text {
+            display: none;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            font-size: 11.5pt;
+            color: #000;
+            min-height: 60px;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .top-utility-bar,
+            .page-header,
+            .creation-quick-bar,
+            .side-ref-drawer,
+            .ws-ref-btn,
+            .topic-preset-btns,
+            .floating-return-creation,
+            .no-print {
+                display: none !important;
+            }
+            .view-section {
+                display: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            #view-creation {
+                display: block !important;
+            }
+            .worksheet-container {
+                border: none !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+            .ws-text-input,
+            .ws-textarea,
+            .ws-inline-input {
+                display: none !important;
+            }
+            .print-only-text {
+                display: block !important;
+            }
+            .print-only-inline {
+                display: inline-block !important;
+                min-width: 200px;
+                border-bottom: 1.5px solid #000;
+                text-align: center;
+            }
+            .speech-worksheet-table th,
+            .speech-worksheet-table td {
+                border: 1.5px solid #000 !important;
+                background: white !important;
+                color: #000 !important;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .creation-workspace-layout { flex-direction: column; }
+            .side-ref-drawer { width: 100%; position: static; }
+            .ws-core-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
@@ -781,6 +1283,7 @@
             .demo-text-content { font-size: 1.25rem; padding: 20px; }
             .analysis-popup-box { flex-direction: column; align-items: flex-start; gap: 10px; }
             .watch-video-pill, .pet-click-pill { font-size: 0.78rem; padding: 5px 10px; }
+            .deep-dive-overlay-btn { font-size: 0.95rem; padding: 8px 14px; }
         }
     </style>
 </head>
@@ -793,11 +1296,14 @@
             <span>我想，我說，我做主！</span>
         </div>
 
-        <div class="timer-box">
-            <span>⏱️ 1分鐘發言計時：</span>
-            <span id="timerDisplay" class="timer-display">01:00</span>
-            <button class="btn btn-primary btn-sm" id="timerStartBtn" onclick="toggleTimer()">開始</button>
-            <button class="btn btn-outline btn-sm" onclick="resetTimer()">重設</button>
+        <div class="top-bar-right">
+            <button class="btn btn-purple btn-sm" onclick="openCreationSpace()">✍️ 我的創作空間</button>
+            <div class="timer-box">
+                <span>⏱️ 1分鐘計時：</span>
+                <span id="timerDisplay" class="timer-display">01:00</span>
+                <button class="btn btn-primary btn-sm" id="timerStartBtn" onclick="toggleTimer()">開始</button>
+                <button class="btn btn-outline btn-sm" onclick="resetTimer()">重設</button>
+            </div>
         </div>
     </header>
 
@@ -806,9 +1312,14 @@
         <div class="hero-banner">
             <h1 class="main-title">我想，我說，我做主！</h1>
             <p class="sub-title">一分鐘個人看法與立場表達互動練習空間</p>
-            <button class="btn btn-demo-hero" onclick="openDemo(1)">
-                💡 表達意見示範
-            </button>
+            <div class="hero-action-group">
+                <button class="btn btn-demo-hero" onclick="openDemo(1)">
+                    💡 表達意見示範
+                </button>
+                <button class="btn btn-create-hero" onclick="openCreationSpace()">
+                    ✍️ 我的創作空間（撰寫發言講稿）
+                </button>
+            </div>
         </div>
 
         <div class="topics-grid">
@@ -836,7 +1347,7 @@
                 <div class="topic-card-body">
                     <div>
                         <div class="topic-card-title">你會飼養以下哪種寵物？</div>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">點擊狗、鸚鵡、鬆獅蜥蜴查看寵物介紹並練習發言</p>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">點擊狗、鸚鵡、鬆獅蜥蜴查看介紹與「深入了解」</p>
                     </div>
                     <span class="btn btn-secondary">進入題目 ➔</span>
                 </div>
@@ -848,9 +1359,9 @@
     <section id="view-demo" class="view-section">
         <div class="page-header">
             <h2 style="font-size: 1.5rem; color: var(--primary-dark);">💡 表達意見示範（三段式結構與內容分析）</h2>
-            <!-- 右上角導航按鈕：回首頁、上頁、下頁 -->
             <div class="top-right-nav">
-                <button class="btn btn-outline" id="returnFromDemoBtn" onclick="returnFromDemo()" style="display: none;">↩️ 返回剛才題目</button>
+                <button class="btn btn-outline" id="returnFromDemoBtn" onclick="returnFromDemo()" style="display: none;">↩️ 返回剛才頁面</button>
+                <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
                 <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
                 <button class="btn btn-primary" id="demoPrevBtn" onclick="changeDemoPage(-1)">⬅️ 上頁</button>
                 <button class="btn btn-primary" id="demoNextBtn" onclick="changeDemoPage(1)">下頁 ➡️</button>
@@ -871,16 +1382,13 @@
                     </div>
                 </div>
 
-                <!-- 互動提示與一鍵顯示標籤開關 -->
                 <div class="analysis-instruction-bar">
                     <span>👆 <strong>互動內容分析：</strong>請直接點擊下方不同句子或詞語，查看屬於哪一部分結構！</span>
                     <button class="btn btn-outline btn-sm" id="toggleAllTagsBtn" onclick="toggleAllInlineTags()">🏷️ 顯示全部結構標籤</button>
                 </div>
 
-                <!-- 示範文字區（支援點擊句子片段） -->
                 <div class="demo-text-content demo-color-p1" id="demoTextContent"></div>
 
-                <!-- 點擊後彈出/顯示的結構分析卡片 -->
                 <div class="analysis-popup-box" id="analysisPopupBox">
                     <span class="analysis-badge-large" id="analysisBadge" style="background: #64748b;">🔍 內容分析</span>
                     <div class="analysis-detail-body">
@@ -899,6 +1407,7 @@
         <div class="page-header">
             <h2 style="font-size: 1.5rem; color: var(--primary-dark);">🎬 看影片表達意見：你會選擇以下哪個國家旅行？</h2>
             <div class="top-right-nav">
+                <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
                 <button class="btn btn-accent" onclick="openDemo(1, 'topic-b')">💡 看示範</button>
                 <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
             </div>
@@ -911,17 +1420,14 @@
         <div class="b1-interactive-container">
             <img src="B1.jpg" alt="你會選擇以下哪個國家旅行？" class="main-b1-img">
 
-            <!-- 日本點擊區 -->
             <div class="country-hotspot hotspot-japan" onclick="openVideo('日本', 'V1.mp4')" title="點擊觀看日本影片">
                 <span class="watch-video-pill">▶️ 點擊看影片：日本</span>
             </div>
 
-            <!-- 法國點擊區 -->
             <div class="country-hotspot hotspot-france" onclick="openVideo('法國', 'V2.mp4')" title="點擊觀看法國影片">
                 <span class="watch-video-pill">▶️ 點擊看影片：法國</span>
             </div>
 
-            <!-- 巴西點擊區 -->
             <div class="country-hotspot hotspot-brazil" onclick="openVideo('巴西', 'V3.mp4')" title="點擊觀看巴西影片">
                 <span class="watch-video-pill">▶️ 點擊看影片：巴西</span>
             </div>
@@ -940,6 +1446,7 @@
             <h2 style="font-size: 1.5rem; color: var(--primary-dark);">🎬 觀看國家介紹影片</h2>
             <div class="top-right-nav">
                 <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目</button>
+                <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
                 <button class="btn btn-accent" onclick="openDemo(1, 'video-player')">💡 看示範</button>
                 <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
             </div>
@@ -957,18 +1464,19 @@
 
             <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
                 <button class="btn btn-primary" onclick="navigateTo('topic-b')">🔙 回到題目（重新選擇其他國家）</button>
+                <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 前往我的創作空間寫講稿</button>
                 <button class="btn btn-accent" onclick="openDemo(1, 'video-player')">💡 看示範</button>
             </div>
         </div>
     </section>
 
-    <!-- ==================== 4. 題目二：寵物題目（不顯示 D1-D7 及 .jpg 字樣） ==================== -->
+    <!-- ==================== 4. 題目二：寵物題目（含「深入了解」按鈕） ==================== -->
     <section id="view-topic-d" class="view-section">
         <div class="page-header">
             <h2 style="font-size: 1.5rem; color: var(--secondary);">🐾 看圖片表達意見：你會飼養以下哪種寵物？</h2>
-            <!-- 每頁設「上頁」、「下頁」、以及「看示範」按鍵 -->
             <div class="top-right-nav">
                 <button class="btn btn-outline" id="backToD1Btn" onclick="renderDPage(1)" style="display: none;">🐾 返回寵物題目頁</button>
+                <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
                 <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
                 <button class="btn btn-secondary" id="dPrevBtn" onclick="changeDPage(-1)">⬅️ 上頁</button>
                 <button class="btn btn-secondary" id="dNextBtn" onclick="changeDPage(1)">下頁 ➡️</button>
@@ -977,7 +1485,13 @@
         </div>
 
         <div class="d-slide-container">
-            <div class="d-page-indicator" id="dPageIndicator">寵物題目頁：你會飼養以下哪種寵物？</div>
+            <div class="d-top-status-row">
+                <div class="d-page-indicator" id="dPageIndicator">寵物題目頁：你會飼養以下哪種寵物？</div>
+                <!-- 當在狗(一)[D2]、鸚鵡(一)[D4]、鬆獅蜥蜴(一)[D6] 時顯示的頂部深入了解按鈕 -->
+                <button class="btn btn-purple" id="topDeepDiveBtn" style="display: none;" onclick="triggerCurrentDeepDive()">
+                    🔎 深入了解此寵物
+                </button>
+            </div>
 
             <p id="d1ClickHint" style="color: var(--text-muted); font-weight: 700; margin-bottom: 12px; font-size: 1.1rem;">
                 👇 請直接點擊下方圖片中的「狗」、「鸚鵡」或「鬆獅蜥蜴」查看詳細資料：
@@ -988,24 +1502,26 @@
 
                 <!-- 僅在寵物題目頁顯示的「狗」、「鸚鵡」、「鬆獅蜥蜴」圖片點擊按鍵層 -->
                 <div id="d1HotspotsLayer" class="d1-hotspots-layer">
-                    <!-- 點擊狗 -->
                     <div class="pet-hotspot hotspot-dog" onclick="renderDPage(2)" title="點擊查看「狗」資料">
                         <span class="pet-click-pill">🐶 點擊看：狗</span>
                     </div>
 
-                    <!-- 點擊鸚鵡 -->
                     <div class="pet-hotspot hotspot-parrot" onclick="renderDPage(4)" title="點擊查看「鸚鵡」資料">
                         <span class="pet-click-pill">🦜 點擊看：鸚鵡</span>
                     </div>
 
-                    <!-- 點擊鬆獅蜥蜴 -->
                     <div class="pet-hotspot hotspot-lizard" onclick="renderDPage(6)" title="點擊查看「鬆獅蜥蜴」資料">
                         <span class="pet-click-pill">🦎 點擊看：鬆獅蜥蜴</span>
                     </div>
                 </div>
+
+                <!-- 在 D2(狗一)、D4(鸚鵡一)、D6(鬆獅蜥蜴一) 圖片上顯示的「深入了解」互動按鍵 -->
+                <button id="imgDeepDiveOverlayBtn" class="deep-dive-overlay-btn" onclick="triggerCurrentDeepDive()">
+                    🔎 深入了解
+                </button>
             </div>
 
-            <!-- 動物分類快捷按鍵（無 D1-D7 或 .jpg 字樣） -->
+            <!-- 動物分類快捷按鍵 -->
             <div class="pet-quick-buttons">
                 <button class="btn btn-outline" id="btnPetHome" onclick="renderDPage(1)">📋 寵物題目頁</button>
                 <button class="btn btn-secondary" onclick="renderDPage(2)">🐶 狗</button>
@@ -1013,10 +1529,203 @@
                 <button class="btn btn-secondary" onclick="renderDPage(6)">🦎 鬆獅蜥蜴</button>
             </div>
 
-            <!-- 下方條列選擇（顯示為：狗、鸚鵡、鬆獅蜥蜴） -->
+            <!-- 下方條列選擇 -->
             <div class="d-dots-bar" id="dDotsBar"></div>
         </div>
     </section>
+
+    <!-- ==================== 5. 三種動物「深入了解」趣味詳細介紹頁面 ==================== -->
+    <section id="view-pet-detail" class="view-section">
+        <div class="page-header">
+            <h2 style="font-size: 1.5rem; color: var(--purple-dark);" id="petDetailHeaderTitle">🔎 寵物深入了解趣味百科</h2>
+            <div class="top-right-nav">
+                <button class="btn btn-secondary" id="backToPetSlideBtn" onclick="returnToPetSlide()">↩️ 返回寵物資料圖卡</button>
+                <button class="btn btn-purple" onclick="openCreationSpace()">✍️ 我的創作空間</button>
+                <button class="btn btn-accent" onclick="openDemo(1, 'pet-detail')">💡 看示範</button>
+                <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
+            </div>
+        </div>
+
+        <div id="petDetailContentContainer">
+            <!-- 由 JavaScript 動態渲染狗、鸚鵡或鬆獅蜥蜴的豐富趣味百科內容 -->
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 20px; padding-top: 18px; border-top: 2px dashed #e2e8f0;">
+            <span style="font-weight: 800; color: var(--text-muted); align-self: center;">切換深入了解其他寵物：</span>
+            <button class="btn btn-outline" onclick="openPetDetail('dog', 2)">🐶 深入了解：狗</button>
+            <button class="btn btn-outline" onclick="openPetDetail('parrot', 4)">🦜 深入了解：鸚鵡</button>
+            <button class="btn btn-outline" onclick="openPetDetail('lizard', 6)">🦎 深入了解：鬆獅蜥蜴</button>
+        </div>
+    </section>
+
+    <!-- ==================== 6. 我的創作空間（個人講稿創作頁面） ==================== -->
+    <section id="view-creation" class="view-section">
+        <div class="page-header">
+            <h2 style="font-size: 1.6rem; color: var(--purple-dark);">✍️ 我的創作空間（個人發言講稿創作）</h2>
+            <div class="top-right-nav">
+                <button class="btn btn-primary" onclick="downloadWordDoc()">📄 下載 WORD (.doc)</button>
+                <button class="btn btn-secondary" onclick="downloadPdfDoc()">🖨️ 下載 PDF</button>
+                <button class="btn btn-outline" onclick="clearWorksheet()">🗑️ 清空重寫</button>
+                <button class="btn btn-outline" onclick="navigateTo('home')">🏠 回首頁</button>
+            </div>
+        </div>
+
+        <!-- 頂部快速切換至題目與示範工具列（不影響已輸入內容） -->
+        <div class="creation-quick-bar">
+            <div class="hint">
+                💡 <strong>貼心提示：</strong>您輸入的內容會自動保存！創作期間可隨時切換觀看題目圖片或影片，內容絕不會消失。
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="switchToTopicFromCreation('topic-b')">🎬 切換看：國家旅行題目</button>
+                <button class="btn btn-secondary btn-sm" onclick="switchToTopicFromCreation('topic-d')">🐾 切換看：飼養寵物題目</button>
+                <button class="btn btn-accent btn-sm" onclick="toggleSideReference(1)">📖 開啟／關閉右側範例對照</button>
+            </div>
+        </div>
+
+        <div class="creation-workspace-layout">
+            <!-- 左側：參照附件「發言講稿.png」設計的發言稿創作表格 -->
+            <div class="worksheet-container" id="worksheetPrintableArea">
+                <table class="speech-worksheet-table">
+                    <tbody>
+                        <!-- 姓名列 -->
+                        <tr>
+                            <td colspan="2" class="ws-name-row">
+                                姓名：
+                                <input type="text" id="ws_name" class="ws-inline-input" placeholder="請輸入姓名" oninput="saveWorksheetData()">
+                                <span id="print_ws_name" class="print-only-text print-only-inline"></span>
+                            </td>
+                        </tr>
+
+                        <!-- 討論主題列 -->
+                        <tr>
+                            <td class="ws-label-col">討論主題：</td>
+                            <td>
+                                <input type="text" id="ws_topic" class="ws-text-input" placeholder="例如：你會選擇以下哪個國家旅行？ / 你會飼養以下哪種寵物？" oninput="saveWorksheetData()">
+                                <div class="topic-preset-btns" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="setWorksheetTopic('你會選擇以下哪個國家旅行？（日本／法國／巴西）')">➕ 帶入題目一：國家旅行</button>
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="setWorksheetTopic('你會飼養以下哪種寵物？（狗／鸚鵡／鬆獅蜥蜴）')">➕ 帶入題目二：飼養寵物</button>
+                                </div>
+                                <div id="print_ws_topic" class="print-only-text"></div>
+                            </td>
+                        </tr>
+
+                        <!-- 圍繞核心列 -->
+                        <tr>
+                            <td class="ws-label-col">圍繞核心：</td>
+                            <td>
+                                <div class="ws-core-grid">
+                                    <div class="ws-core-item">
+                                        <span>1.</span>
+                                        <input type="text" id="ws_core1" class="ws-text-input" placeholder="核心原因／觀點一（如：風景優美）" oninput="saveWorksheetData()">
+                                    </div>
+                                    <div class="ws-core-item">
+                                        <span>2.</span>
+                                        <input type="text" id="ws_core2" class="ws-text-input" placeholder="核心原因／觀點二（如：生活便利）" oninput="saveWorksheetData()">
+                                    </div>
+                                </div>
+                                <div id="print_ws_cores" class="print-only-text"></div>
+                            </td>
+                        </tr>
+
+                        <!-- 發言稿橫幅 -->
+                        <tr>
+                            <td colspan="2" class="ws-section-banner">發言稿</td>
+                        </tr>
+
+                        <!-- 第一段論式 -->
+                        <tr>
+                            <td class="ws-label-col">
+                                <div>第一段論式</div>
+                                <div>1 個立場</div>
+                                <div>2 個觀點</div>
+                                <button type="button" class="ws-ref-btn" onclick="openSideReferenceStep(1)">
+                                    📖 打開第一段範例參考
+                                </button>
+                            </td>
+                            <td>
+                                <textarea id="ws_stage1" class="ws-textarea" rows="4" placeholder="請寫出你的立場及2個主要觀點（原因）……&#10;句式提示：對於……，我的看法／選擇是……。因為這裡……；而且……。" oninput="saveWorksheetData()"></textarea>
+                                <div id="print_ws_stage1" class="print-only-text"></div>
+                            </td>
+                        </tr>
+
+                        <!-- 第二段論式 -->
+                        <tr>
+                            <td class="ws-label-col">
+                                <div>第二段論式</div>
+                                <div>3-4 個</div>
+                                <div>具體原因</div>
+                                <div>(必須舉例)</div>
+                                <button type="button" class="ws-ref-btn" onclick="openSideReferenceStep(2)">
+                                    📖 打開第二段範例參考
+                                </button>
+                            </td>
+                            <td>
+                                <textarea id="ws_stage2" class="ws-textarea" rows="9" placeholder="請分點闡述 3-4 個具體原因，並加入「分類說明」、「舉例說明」及「拓展(指出優點/效果)」……&#10;句式提示：&#10;首先，在……方面，……&#10;其次，在……方面，……&#10;再者，在……方面，……&#10;最後，……" oninput="saveWorksheetData()"></textarea>
+                                <div id="print_ws_stage2" class="print-only-text"></div>
+                            </td>
+                        </tr>
+
+                        <!-- 第三段論式 -->
+                        <tr>
+                            <td class="ws-label-col">
+                                <div>第三段論式</div>
+                                <div>總結</div>
+                                <div>(重申立場</div>
+                                <div>歸納原因)</div>
+                                <button type="button" class="ws-ref-btn" onclick="openSideReferenceStep(3)">
+                                    📖 打開第三段範例參考
+                                </button>
+                            </td>
+                            <td>
+                                <textarea id="ws_stage3" class="ws-textarea" rows="4" placeholder="請總結全文，歸納原因並重申你的立場……&#10;句式提示：總括而言，……無論在……、……還是……方面，都能滿足……，所以我的選擇是……。" oninput="saveWorksheetData()"></textarea>
+                                <div id="print_ws_stage3" class="print-only-text"></div>
+                            </td>
+                        </tr>
+
+                        <!-- 成績列 -->
+                        <tr>
+                            <td class="ws-label-col">成績：</td>
+                            <td>
+                                <input type="text" id="ws_grade" class="ws-text-input" placeholder="（由老師評分或自我檢視填寫）" oninput="saveWorksheetData()">
+                                <div id="print_ws_grade" class="print-only-text"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 右側：可隨時展開對照的「說話示範參考」抽屜面板 -->
+            <aside class="side-ref-drawer" id="sideRefDrawer">
+                <div class="side-ref-header">
+                    <h3 style="color: var(--primary-dark); font-size: 1.2rem;">💡 說話示範即時參考</h3>
+                    <button class="btn btn-outline btn-sm" onclick="closeSideReference()">✖ 關閉</button>
+                </div>
+
+                <div class="side-ref-tabs">
+                    <button class="side-ref-tab active" id="refTab1" onclick="openSideReferenceStep(1)">第一段式</button>
+                    <button class="side-ref-tab" id="refTab2" onclick="openSideReferenceStep(2)">第二段式</button>
+                    <button class="side-ref-tab" id="refTab3" onclick="openSideReferenceStep(3)">第三段式</button>
+                </div>
+
+                <div id="sideRefStepTitle" style="font-weight: 900; color: #dc2626; font-size: 1.15rem; margin-bottom: 8px;">
+                    第一段式：1個立場、2個原因
+                </div>
+
+                <div class="side-ref-content-box" id="sideRefContentBox"></div>
+
+                <div style="background: #fef3c7; border-radius: 10px; padding: 12px; font-size: 0.92rem; color: #92400e; font-weight: 700; margin-bottom: 12px;" id="sideRefStructureTip"></div>
+
+                <button class="btn btn-accent btn-sm" style="width: 100%;" onclick="openDemoFromCreation()">
+                    🔍 前往全螢幕互動分析示範頁
+                </button>
+            </aside>
+        </div>
+    </section>
+
+    <!-- 懸浮「返回我的創作空間」快捷鍵（當學生從創作空間切換去看題目時顯示） -->
+    <button id="floatingReturnCreationBtn" class="floating-return-creation" onclick="openCreationSpace()">
+        ✍️ 返回「我的創作空間」繼續寫稿（內容已保存）
+    </button>
 
     <script>
         // ================= 狀態管理 =================
@@ -1025,13 +1734,17 @@
         let currentDPage = 1;
         const totalDPages = 7;
         let showAllTags = false;
+        let activePetDetailOriginSlide = 2;
+        let isCreationSessionActive = false;
+        let currentSideRefStep = 1;
 
-        // A1-A3 說話示範與點擊分析資料（文字內容嚴格保持不變）
+        // A1-A3 說話示範與點擊分析資料
         const demoPagesData = {
             1: {
                 stepTitle: "第一段式",
                 stepSubtitle: "1個立場、2個原因",
                 colorClass: "demo-color-p1",
+                structureTip: "📌 寫作要訣：先用一句話清楚表明你的最終選擇【立場】，再用「因為……而且……」列出兩個核心原因【觀點】。",
                 paragraphs: [
                     [
                         {
@@ -1065,6 +1778,7 @@
                 stepTitle: "第二段式",
                 stepSubtitle: "3/4句解釋",
                 colorClass: "demo-color-p2",
+                structureTip: "📌 寫作要訣：善用「首先，在……方面」、「其次」、「再者」、「最後」作【分類說明】，每點先【舉例說明】，最後加上【拓展(指出優點/效果)】。",
                 paragraphs: [
                     [
                         {
@@ -1156,6 +1870,7 @@
                 stepTitle: "第三段式",
                 stepSubtitle: "總結",
                 colorClass: "demo-color-p3",
+                structureTip: "📌 寫作要訣：用「總括而言」歸納前面提過的分類重點，指出整體效果後，再用「所以我的選擇是……」首尾呼應重申立場。",
                 paragraphs: [
                     [
                         {
@@ -1187,13 +1902,116 @@
 
         // 寵物頁面標題與底部條列按鈕名稱（完全不出現 D1-D7 及 .jpg 字樣）
         const dPageMeta = {
-            1: { navLabel: "寵物題目頁", title: "寵物題目頁：你會飼養以下哪種寵物？（點擊狗 / 鸚鵡 / 鬆獅蜥蜴）" },
-            2: { navLabel: "狗 (一)", title: "🐶 狗：特點與飼養環境" },
-            3: { navLabel: "狗 (二)", title: "🐶 狗：食物與互動性" },
-            4: { navLabel: "鸚鵡 (一)", title: "🦜 鸚鵡：特點與飼養環境" },
-            5: { navLabel: "鸚鵡 (二)", title: "🦜 鸚鵡：食物與互動性" },
-            6: { navLabel: "鬆獅蜥蜴 (一)", title: "🦎 鬆獅蜥蜴：特點與飼養環境" },
-            7: { navLabel: "鬆獅蜥蜴 (二)", title: "🦎 鬆獅蜥蜴：食物與互動性" }
+            1: { navLabel: "寵物題目頁", title: "寵物題目頁：你會飼養以下哪種寵物？（點擊狗 / 鸚鵡 / 鬆獅蜥蜴）", deepDiveKey: null },
+            2: { navLabel: "狗 (一)", title: "🐶 狗：特點與飼養環境", deepDiveKey: "dog" },
+            3: { navLabel: "狗 (二)", title: "🐶 狗：食物與互動性", deepDiveKey: null },
+            4: { navLabel: "鸚鵡 (一)", title: "🦜 鸚鵡：特點與飼養環境", deepDiveKey: "parrot" },
+            5: { navLabel: "鸚鵡 (二)", title: "🦜 鸚鵡：食物與互動性", deepDiveKey: null },
+            6: { navLabel: "鬆獅蜥蜴 (一)", title: "🦎 鬆獅蜥蜴：特點與飼養環境", deepDiveKey: "lizard" },
+            7: { navLabel: "鬆獅蜥蜴 (二)", title: "🦎 鬆獅蜥蜴：食物與互動性", deepDiveKey: null }
+        };
+
+        // 三種動物「深入了解」趣味百科資料
+        const petDeepDiveData = {
+            dog: {
+                name: "🐶 狗狗趣味百科檔案",
+                subtitle: "人類最忠誠的好夥伴 —— 聰明、熱情又貼心的毛孩",
+                heroClass: "pet-hero-dog",
+                stats: [
+                    { label: "平均智商", val: "約 4-8 歲幼童" },
+                    { label: "平均壽命", val: "10 - 15 年" },
+                    { label: "嗅覺靈敏度", val: "人類的 1萬至10萬倍" },
+                    { label: "性格特質", val: "忠誠、愛玩、親人" }
+                ],
+                facts: [
+                    {
+                        icon: "🧠",
+                        title: "超強學習力與讀心術",
+                        desc: "狗狗擁有相當於 4 至 8 歲人類幼童的智商，能聽懂超過 150 個詞彙與手勢指令（如坐下、握手、接飛盤）。更神奇的是，科學研究發現狗狗能看懂主人的臉部表情與語氣，當你難過時，牠會主動靠過來舔舔你或依偎在你身邊安慰你！"
+                    },
+                    {
+                        icon: "🐕",
+                        title: "搖尾巴也有「方向密碼」？",
+                        desc: "大家都知道狗狗搖尾巴代表興奮，但原來方向大有學問！當狗狗看到喜歡的主人或食物時，尾巴會偏向「右邊」擺動；如果遇到陌生環境或感到緊張猶豫時，尾巴則會偏向「左邊」擺動喔！"
+                    },
+                    {
+                        icon: "🏡",
+                        title: "照顧小貼士：乾燥通風與每日散步",
+                        desc: "狗狗汗腺主要在腳掌，居住環境需要保持「乾燥通風」以防皮膚病。牠們精力充沛、喜愛戶外活動，主人需要每天抽時間帶牠散步放電，並準備營養均衡的狗乾糧、自製鮮食與充足飲水。"
+                    }
+                ],
+                speakingTips: [
+                    "【互動性方面】狗狗天性熱情、愛與主人親近，放學回家時牠總會在門口搖尾巴迎接，還能一起去公園玩飛盤，幫我紓解讀書壓力。",
+                    "【特點與智商方面】狗狗擁有 4 至 8 歲幼童的智商，能聽懂指令並與人建立深厚感情，就像多了一位忠誠可靠的家庭成員。",
+                    "【飼養環境方面】香港家居只要保持室內乾燥通風，加上狗乾糧容易購買，配合每天帶牠散步，還能順便養成我自己多做運動的好習慣！"
+                ]
+            },
+            parrot: {
+                name: "🦜 鸚鵡趣味百科檔案",
+                subtitle: "羽毛華麗的森林歌唱家 —— 會說話、愛撒嬌的聰明鳥兒",
+                heroClass: "pet-hero-parrot",
+                stats: [
+                    { label: "平均智商", val: "約 2-7 歲幼童" },
+                    { label: "平均壽命", val: "15 - 50 年以上" },
+                    { label: "最適室溫", val: "室溫（不可高於35度）" },
+                    { label: "互動絕技", val: "學說話、唱歌、擊掌" }
+                ],
+                facts: [
+                    {
+                        icon: "🎵",
+                        title: "為甚麼鸚鵡沒有嘴唇卻能說話？",
+                        desc: "人類靠嘴唇和舌頭發音，而鸚鵡則是靠喉嚨深處獨特的發聲器官「鳴管」（Syrinx）與靈活厚實的舌頭來模仿聲音！加上牠們擁有 2 至 7 歲幼童的高智商，不但能模仿主人說「媽媽、早安」，還能跟著音樂節拍點頭跳舞唱歌！"
+                    },
+                    {
+                        icon: "🤝",
+                        title: "超愛撒嬌的「社交達人」",
+                        desc: "許多人以為鳥類很冷淡，其實鸚鵡感情非常豐富！牠們喜歡用嘴輕輕理毛來表達愛意（「親親」），經過簡單訓練就能和主人玩「擊掌（High-Five）」遊戲。如果主人太久不理牠，牠甚至會故意大叫來吸引注意呢！"
+                    },
+                    {
+                        icon: "🌡️",
+                        title: "照顧小貼士：怕熱體質與天然美食",
+                        desc: "鸚鵡身上沒有汗腺，非常怕熱，飼養環境必須保持空氣流通，室溫「絕對不可高於 35 度」以免中暑。飲食方面十分健康天然，最愛吃堅果、新鮮蔬果和清潔飲水，但切記「牛油果」和「朱古力」對鸚鵡是有毒的！"
+                    }
+                ],
+                speakingTips: [
+                    "【特點與趣味方面】鸚鵡羽毛色彩繽紛，極具觀賞價值，而且能模仿人類說話和唱歌，每天在家聽到牠叫『媽媽』或唱歌，家裡充滿歡笑聲。",
+                    "【飼養環境與空間方面】香港居住空間有限，鸚鵡主要在鳥籠及室內活動，只需保持室溫不高於 35 度即可，非常適合香港家庭飼養。",
+                    "【食物與互動方面】牠的食物是堅果和蔬果，準備簡單乾淨；而且牠很愛撒嬌，能跟主人玩擊掌和親親，互動性極高！"
+                ]
+            },
+            lizard: {
+                name: "🦎 鬆獅蜥蜴趣味百科檔案",
+                subtitle: "爬蟲界的溫馴微笑天使 —— 酷炫、安靜又容易打理的沙漠小龍",
+                heroClass: "pet-hero-lizard",
+                stats: [
+                    { label: "性格評價", val: "最溫順的爬蟲寵物" },
+                    { label: "飼養溫度", val: "30 ~ 40 度（需燈具）" },
+                    { label: "噪音程度", val: "0 分貝（完全安靜）" },
+                    { label: "清潔打理", val: "無毛屑、乾淨易打理" }
+                ],
+                facts: [
+                    {
+                        icon: "👋",
+                        title: "牠為甚麼叫「鬆獅」？還會對人「揮手」？",
+                        desc: "鬆獅蜥蜴原產於澳洲乾燥地區，當牠受驚或想展現威風時，會把喉嚨下方的皮摺撐開，看起來就像獅子的鬃毛一樣，因而得名！最可愛的是，牠們有獨特的肢體語言：緩慢「舉起一隻前腳揮手」代表友好與示弱；「快速點頭」則代表宣示主權！"
+                    },
+                    {
+                        icon: "☀️",
+                        title: "專屬陽光屋：太陽燈與紫外線燈的秘密",
+                        desc: "身為變溫爬蟲動物，鬆獅蜥蜴需要「30 至 40 度」的溫暖環境來幫助消化食物。因此飼養箱內必須安裝「太陽燈（聚熱燈）」讓牠享受日光浴，以及「紫外線燈（UVB燈）」幫助牠合成維他命 D3 並吸收鈣質，骨骼才會強壯健康！"
+                    },
+                    {
+                        icon: "🎩",
+                        title: "呆萌百變造型王，不怕毛髮敏感",
+                        desc: "鬆獅蜥蜴是公認「最溫順的爬蟲寵物」，幾乎不會咬人，動作慢條斯理，甚至願意乖乖戴上迷你聖誕帽或小帽子拍照！而且牠不會吠叫吵到鄰居，也沒有貓狗毛髮過敏問題，排泄物少且氣味輕，非常乾淨、容易打理。"
+                    }
+                ],
+                speakingTips: [
+                    "【特點與性格方面】鬆獅蜥蜴是最溫順的爬蟲寵物，外型酷炫獨特，具極高觀賞價值，還可以幫牠戴上小帽子拍照，非常有趣。",
+                    "【衛生與打理方面】牠完全不會掉毛，也不會像小狗或鸚鵡那樣發出叫聲影響家人或鄰居，非常乾淨、容易打理，適合喜歡安靜的人。",
+                    "【飼養環境方面】雖然需要準備 30 至 40 度的飼養箱、太陽燈和紫外線燈，但只要設備安裝好，日常照料非常穩定省時，不需每天外出遛寵物。"
+                ]
+            }
         };
 
         // ================= 頁面切換功能 =================
@@ -1213,6 +2031,14 @@
             if (target) {
                 target.classList.add('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // 控制右下角「返回我的創作空間」懸浮按鈕顯示
+            const floatBtn = document.getElementById('floatingReturnCreationBtn');
+            if (viewId === 'creation' || viewId === 'home') {
+                floatBtn.style.display = 'none';
+            } else if (isCreationSessionActive) {
+                floatBtn.style.display = 'inline-flex';
             }
         }
 
@@ -1279,7 +2105,6 @@
             });
             contentBox.innerHTML = htmlParagraphs;
 
-            // 重設下方分析面板為預設提示
             const popupBox = document.getElementById('analysisPopupBox');
             popupBox.classList.remove('active-analysis');
             const badge = document.getElementById('analysisBadge');
@@ -1314,7 +2139,7 @@
 
             const popupBox = document.getElementById('analysisPopupBox');
             popupBox.classList.remove('active-analysis');
-            void popupBox.offsetWidth; // 觸發動畫重播
+            void popupBox.offsetWidth;
             popupBox.classList.add('active-analysis');
 
             const badge = document.getElementById('analysisBadge');
@@ -1337,7 +2162,7 @@
             videoEl.play().catch(() => {});
         }
 
-        // ================= 題目二：寵物圖片瀏覽（不顯示 D1-D7 及 .jpg 字樣） =================
+        // ================= 題目二：寵物圖片瀏覽與「深入了解」 =================
         function openTopicD(page = 1) {
             renderDPage(page);
             navigateTo('topic-d');
@@ -1357,10 +2182,8 @@
             imgEl.src = imgFile;
             imgEl.alt = dPageMeta[pageNum].title;
 
-            // 頂部標題列只顯示寵物名稱與說明，不顯示 D1-D7 及 .jpg
             document.getElementById('dPageIndicator').textContent = dPageMeta[pageNum].title;
 
-            // 控制題目頁上的三個動物圖片點擊熱區與返回按鈕顯示
             const hotspotsLayer = document.getElementById('d1HotspotsLayer');
             const clickHint = document.getElementById('d1ClickHint');
             const backToD1Btn = document.getElementById('backToD1Btn');
@@ -1375,10 +2198,25 @@
                 backToD1Btn.style.display = 'inline-flex';
             }
 
+            // 控制 D2(狗一)、D4(鸚鵡一)、D6(鬆獅蜥蜴一) 的「深入了解」按鈕顯示
+            const deepDiveKey = dPageMeta[pageNum].deepDiveKey;
+            const overlayDeepBtn = document.getElementById('imgDeepDiveOverlayBtn');
+            const topDeepBtn = document.getElementById('topDeepDiveBtn');
+
+            if (deepDiveKey) {
+                const petNameMap = { dog: '狗', parrot: '鸚鵡', lizard: '鬆獅蜥蜴' };
+                overlayDeepBtn.style.display = 'inline-flex';
+                overlayDeepBtn.innerHTML = `🔎 深入了解：${petNameMap[deepDiveKey]}`;
+                topDeepBtn.style.display = 'inline-flex';
+                topDeepBtn.innerHTML = `🔎 深入了解（${petNameMap[deepDiveKey]}趣味百科）`;
+            } else {
+                overlayDeepBtn.style.display = 'none';
+                topDeepBtn.style.display = 'none';
+            }
+
             document.getElementById('dPrevBtn').disabled = (pageNum === 1);
             document.getElementById('dNextBtn').disabled = (pageNum === totalDPages);
 
-            // 下方條列選擇：D2、D3 顯示為「狗」，D4、D5 顯示為「鸚鵡」，D6、D7 顯示為「鬆獅蜥蜴」
             const dotsBar = document.getElementById('dDotsBar');
             let dotsHtml = '';
             for (let i = 1; i <= totalDPages; i++) {
@@ -1386,6 +2224,283 @@
                 dotsHtml += `<button class="d-dot-btn ${activeClass}" onclick="renderDPage(${i})">${dPageMeta[i].navLabel}</button>`;
             }
             dotsBar.innerHTML = dotsHtml;
+        }
+
+        function triggerCurrentDeepDive() {
+            const deepKey = dPageMeta[currentDPage].deepDiveKey;
+            if (deepKey) {
+                openPetDetail(deepKey, currentDPage);
+            }
+        }
+
+        function openPetDetail(petKey, originSlideNum) {
+            activePetDetailOriginSlide = originSlideNum || currentDPage || 2;
+            const info = petDeepDiveData[petKey];
+            if (!info) return;
+
+            document.getElementById('petDetailHeaderTitle').textContent = `🔎 深入了解：${info.name}`;
+
+            const statsHtml = info.stats.map(s => `
+                <div class="pet-stat-pill">
+                    <span class="label">${s.label}</span>
+                    <span class="val">${s.val}</span>
+                </div>
+            `).join('');
+
+            const factsHtml = info.facts.map(f => `
+                <div class="fun-fact-card">
+                    <h3><span>${f.icon}</span><span>${f.title}</span></h3>
+                    <p>${f.desc}</p>
+                </div>
+            `).join('');
+
+            const tipsHtml = info.speakingTips.map(t => `<li>${t}</li>`).join('');
+
+            const container = document.getElementById('petDetailContentContainer');
+            container.innerHTML = `
+                <div class="pet-detail-hero ${info.heroClass}">
+                    <div>
+                        <div class="pet-hero-title">${info.name}</div>
+                        <div class="pet-hero-subtitle">${info.subtitle}</div>
+                    </div>
+                    <div class="pet-stats-badges">
+                        ${statsHtml}
+                    </div>
+                </div>
+
+                <div class="fun-facts-grid">
+                    ${factsHtml}
+                </div>
+
+                <div class="speaking-tips-box">
+                    <h3>💡 1分鐘發言靈感百寶箱（你可以這樣運用在講稿中！）</h3>
+                    <ul class="speaking-tips-list">
+                        ${tipsHtml}
+                    </ul>
+                </div>
+            `;
+
+            navigateTo('pet-detail');
+        }
+
+        function returnToPetSlide() {
+            renderDPage(activePetDetailOriginSlide);
+            navigateTo('topic-d');
+        }
+
+        // ================= 6. 我的創作空間（講稿儲存、範例對照、下載 WORD 與 PDF） =================
+        function openCreationSpace() {
+            isCreationSessionActive = true;
+            navigateTo('creation');
+        }
+
+        function switchToTopicFromCreation(targetView) {
+            isCreationSessionActive = true;
+            saveWorksheetData();
+            if (targetView === 'topic-d') {
+                openTopicD(currentDPage);
+            } else {
+                navigateTo(targetView);
+            }
+        }
+
+        function openDemoFromCreation() {
+            isCreationSessionActive = true;
+            saveWorksheetData();
+            openDemo(currentSideRefStep, 'creation');
+        }
+
+        function openSideReferenceStep(stepNum) {
+            currentSideRefStep = stepNum;
+            const drawer = document.getElementById('sideRefDrawer');
+            drawer.classList.add('open');
+
+            [1, 2, 3].forEach(n => {
+                const tab = document.getElementById('refTab' + n);
+                if (n === stepNum) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+
+            const data = demoPagesData[stepNum];
+            document.getElementById('sideRefStepTitle').textContent = `${data.stepTitle}：${data.stepSubtitle}`;
+
+            const paragraphsText = data.paragraphs.map(pSegs => {
+                return `<p style="margin-bottom: 10px; text-indent: 2em;">` + pSegs.map(s => s.text).join('') + `</p>`;
+            }).join('');
+
+            document.getElementById('sideRefContentBox').innerHTML = paragraphsText;
+            document.getElementById('sideRefStructureTip').textContent = data.structureTip;
+        }
+
+        function toggleSideReference(defaultStep = 1) {
+            const drawer = document.getElementById('sideRefDrawer');
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+            } else {
+                openSideReferenceStep(defaultStep);
+            }
+        }
+
+        function closeSideReference() {
+            document.getElementById('sideRefDrawer').classList.remove('open');
+        }
+
+        function setWorksheetTopic(topicStr) {
+            document.getElementById('ws_topic').value = topicStr;
+            saveWorksheetData();
+        }
+
+        const WS_STORAGE_KEY = 'speaking_practice_worksheet_v1';
+
+        function saveWorksheetData() {
+            const payload = {
+                name: document.getElementById('ws_name').value,
+                topic: document.getElementById('ws_topic').value,
+                core1: document.getElementById('ws_core1').value,
+                core2: document.getElementById('ws_core2').value,
+                stage1: document.getElementById('ws_stage1').value,
+                stage2: document.getElementById('ws_stage2').value,
+                stage3: document.getElementById('ws_stage3').value,
+                grade: document.getElementById('ws_grade').value
+            };
+            try {
+                localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(payload));
+            } catch (e) {}
+            syncPrintMirrorText(payload);
+        }
+
+        function loadWorksheetData() {
+            try {
+                const raw = localStorage.getItem(WS_STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                document.getElementById('ws_name').value = data.name || '';
+                document.getElementById('ws_topic').value = data.topic || '';
+                document.getElementById('ws_core1').value = data.core1 || '';
+                document.getElementById('ws_core2').value = data.core2 || '';
+                document.getElementById('ws_stage1').value = data.stage1 || '';
+                document.getElementById('ws_stage2').value = data.stage2 || '';
+                document.getElementById('ws_stage3').value = data.stage3 || '';
+                document.getElementById('ws_grade').value = data.grade || '';
+                syncPrintMirrorText(data);
+            } catch (e) {}
+        }
+
+        function syncPrintMirrorText(data) {
+            document.getElementById('print_ws_name').textContent = data.name || '________________';
+            document.getElementById('print_ws_topic').textContent = data.topic || '';
+            document.getElementById('print_ws_cores').textContent = `1. ${data.core1 || '       '}    2. ${data.core2 || '       '}`;
+            document.getElementById('print_ws_stage1').textContent = data.stage1 || '';
+            document.getElementById('print_ws_stage2').textContent = data.stage2 || '';
+            document.getElementById('print_ws_stage3').textContent = data.stage3 || '';
+            document.getElementById('print_ws_grade').textContent = data.grade || '';
+        }
+
+        function clearWorksheet() {
+            if (!confirm('確定要清空目前填寫的所有講稿內容嗎？')) return;
+            ['ws_name', 'ws_topic', 'ws_core1', 'ws_core2', 'ws_stage1', 'ws_stage2', 'ws_stage3', 'ws_grade'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            saveWorksheetData();
+        }
+
+        function escapeHtmlText(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<br>');
+        }
+
+        // 下載 WORD (.doc) 功能
+        function downloadWordDoc() {
+            saveWorksheetData();
+            const name = document.getElementById('ws_name').value.trim();
+            const topic = document.getElementById('ws_topic').value.trim();
+            const core1 = document.getElementById('ws_core1').value.trim();
+            const core2 = document.getElementById('ws_core2').value.trim();
+            const stage1 = document.getElementById('ws_stage1').value;
+            const stage2 = document.getElementById('ws_stage2').value;
+            const stage3 = document.getElementById('ws_stage3').value;
+            const grade = document.getElementById('ws_grade').value.trim();
+
+            const wordHtml = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                      xmlns:w="urn:schemas-microsoft-com:office:word"
+                      xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>發言講稿</title>
+                    <style>
+                        body { font-family: "PMingLiU", "Microsoft JhengHei", serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; border: 1.5pt solid #000; }
+                        td { border: 1pt solid #000; padding: 10pt; vertical-align: top; font-size: 12pt; line-height: 1.6; }
+                        .name-cell { text-align: center; font-size: 16pt; font-weight: bold; padding: 14pt; }
+                        .banner-cell { text-align: center; font-size: 15pt; font-weight: bold; padding: 10pt; }
+                        .label-cell { width: 24%; font-weight: bold; }
+                        .content-stage1 { min-height: 100pt; }
+                        .content-stage2 { min-height: 240pt; }
+                        .content-stage3 { min-height: 100pt; }
+                    </style>
+                </head>
+                <body>
+                    <table>
+                        <tr>
+                            <td colspan="2" class="name-cell">姓名：<u> ${escapeHtmlText(name || '      ')} </u></td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">討論主題：</td>
+                            <td>${escapeHtmlText(topic)}</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">圍繞核心：</td>
+                            <td>1. ${escapeHtmlText(core1 || '       ')}     2. ${escapeHtmlText(core2 || '       ')}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="banner-cell">發言稿</td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">
+                                第一段論式<br>1 個立場<br>2 個觀點
+                            </td>
+                            <td class="content-stage1">${escapeHtmlText(stage1)}<br><br></td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">
+                                第二段論式<br>3-4 個<br>具體原因<br>(必須舉例)
+                            </td>
+                            <td class="content-stage2">${escapeHtmlText(stage2)}<br><br><br><br><br></td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">
+                                第三段論式<br>總結<br>(重申立場<br>歸納原因)
+                            </td>
+                            <td class="content-stage3">${escapeHtmlText(stage3)}<br><br></td>
+                        </tr>
+                        <tr>
+                            <td class="label-cell">成績：</td>
+                            <td>${escapeHtmlText(grade)}</td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', wordHtml], { type: 'application/msword;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `發言講稿_${name || '學生'}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 下載 PDF 功能（呼叫瀏覽器 A4 標準表格列印／另存為 PDF）
+        function downloadPdfDoc() {
+            saveWorksheetData();
+            window.print();
         }
 
         // ================= 1分鐘發言計時器 =================
@@ -1439,6 +2554,7 @@
         // 初始化
         renderDemoPage(1);
         renderDPage(1);
+        loadWorksheetData();
     </script>
 </body>
 </html>
